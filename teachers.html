@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -66,6 +65,11 @@
             margin-left: 15px;
         }
         
+        .class-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
         .class-name {
             font-size: 18px;
             font-weight: bold;
@@ -73,6 +77,16 @@
             background: #e8f4fc;
             padding: 8px 15px;
             border-radius: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .teacher-name, .students-count {
+            font-size: 14px;
+            color: #666;
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 10px;
+            margin-top: 5px;
         }
         
         .header-controls {
@@ -194,6 +208,19 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
+
+        /* تخصيص حقول إدخال الغياب */
+        .absence-input {
+            background-color: #ffe6e6;
+            border: 2px solid #ff9999;
+        }
+
+        .absence-input:focus {
+            background-color: #ffcccc;
+            border-color: #ff6666;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 102, 102, 0.2);
+        }
         
         .students-list {
             margin-top: 30px;
@@ -224,6 +251,12 @@
             background-color: #e8f4fc;
             border-left: 4px solid var(--primary-color);
         }
+
+        /* تخصيص عناصر الغياب */
+        .absence-item {
+            background-color: #ffe6e6 !important;
+            border-left: 4px solid var(--danger-color) !important;
+        }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -247,6 +280,22 @@
         .student-class {
             color: #777;
             font-size: 14px;
+        }
+
+        .attendance-badge {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: white;
+            margin-right: 8px;
+        }
+
+        .attendance-present {
+            background-color: var(--secondary-color);
+        }
+
+        .attendance-absent {
+            background-color: var(--danger-color);
         }
         
         .student-actions {
@@ -378,6 +427,11 @@
             
             .logo-container {
                 margin-bottom: 15px;
+                flex-direction: column;
+            }
+            
+            .class-info {
+                margin-top: 10px;
             }
             
             .header-controls {
@@ -422,6 +476,29 @@
         body[dir="ltr"] .form-group {
             text-align: left;
         }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -429,7 +506,11 @@
         <header>
             <div class="logo-container">
                 <img src="https://korani.eu/img/logoar.png" alt="شعار الموقع" class="logo">
-                <div class="class-name" id="className">الفصل: غير محدد</div>
+                <div class="class-info">
+                    <div class="class-name" id="className">الفصل: غير محدد</div>
+                    <div class="teacher-name" id="teacherName">المعلم: غير محدد</div>
+                    <div class="students-count" id="studentsCount">عدد الطلاب: 0</div>
+                </div>
             </div>
             <div class="header-controls">
                 <a href="attendance.html" class="btn btn-primary" id="attendanceLink">صفحة الحضور</a>
@@ -464,22 +545,30 @@
                 </div>
                 
                 <div class="section">
-                    <h3>معلومات الفصل</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>عدد الطلاب:</strong> 
-                            <span id="studentsCount">0</span>
+                    <h3>إضافة غياب طالب</h3>
+                    <form id="addAbsenceForm">
+                        <div class="form-group">
+                            <label for="absenceFirstName">الاسم الأول</label>
+                            <input type="text" id="absenceFirstName" class="absence-input" required>
                         </div>
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>المعلم:</strong> 
-                            <span id="teacherName">-</span>
+                        
+                        <div class="form-group">
+                            <label for="absenceLastName">الاسم الثاني</label>
+                            <input type="text" id="absenceLastName" class="absence-input" required>
                         </div>
-                    </div>
+                        
+                        <button type="submit" class="btn btn-warning" style="width: 100%;">
+                            تسجيل الغياب
+                        </button>
+                    </form>
                 </div>
             </div>
             
             <div class="students-list">
-                <h2>قائمة طلاب الفصل</h2>
+                <div class="section-header">
+                    <h2 class="section-title">قائمة طلاب الفصل</h2>
+                    <div class="students-count-badge" id="studentsCountBadge">0 طالب</div>
+                </div>
                 <ul id="studentsRecords">
                     <li class="empty-state" id="emptyState">لا يوجد طلاب مسجلين بعد</li>
                 </ul>
@@ -502,301 +591,402 @@
         </div>
     </div>
 
-<script>
-    // إعدادات JSONBin.io
-    const JSONBIN_CONFIG = {
-        BIN_ID: '68ebd1e4d0ea881f409f33c0',
-        API_KEY: '$2a$10$j2RFt5cgHHSkHvUzwqZV.eoHlA3A.8C.rt4IWH/XDTwyN7Pt1Fm9S',
-        BASE_URL: 'https://api.jsonbin.io/v3/b'
-    };
+    <script>
+        // إعدادات JSONBin.io
+        const JSONBIN_CONFIG = {
+            BIN_ID: '68ebd1e4d0ea881f409f33c0',
+            API_KEY: '$2a$10$j2RFt5cgHHSkHvUzwqZV.eoHlA3A.8C.rt4IWH/XDTwyN7Pt1Fm9S',
+            BASE_URL: 'https://api.jsonbin.io/v3/b'
+        };
 
-    const classes = {
-        1: { name: "معلمة جنين - الاثنين", teacher: "معلمة جنين" },
-        2: { name: "معلمة احلام - الاثنين", teacher: "معلمة أحلام" },
-        3: { name: "معلمة ايات العدوي - الاثنين", teacher: "معلمة آيات العدوي" },
-        4: { name: "معلمة سمر - الاثنين", teacher: "معلمة سمر" },
-        5: { name: "معلمة الاء زيادة - الاثنين", teacher: "معلمة الآء زيادة" },
-        6: { name: "معلمة رانبا - الاثنين", teacher: "معلمة رانبا" },
-        7: { name: "معلم عبادة الاشقر - الاثنين", teacher: "معلم عبادة الأشقر" },
-        8: { name: "معلمة اسماء السلطان - الاثنين", teacher: "معلمة أسماء السلطان" },
-        9: { name: "معلمة سناء - الاثنين", teacher: "معلمة سناء" },
-        10: { name: "معلمة فوزية - الخميس", teacher: "معلمة فوزية" },
-        11: { name: "معلمة ام عمر - الخميس", teacher: "معلمة أم عمر" },
-        12: { name: "معلمة براء - الخميس", teacher: "معلمة براء" },
-        13: { name: "معلمة ناريمان صالح - الخميس", teacher: "معلمة ناريمان صالح" },
-        14: { name: "معلم عثمان الخطيب - الخميس", teacher: "معلم عثمان الخطيب" },
-        15: { name: "معلمة .ام براء - الخميس", teacher: "معلمة أم براء" },
-        16: { name: "معلمة مروة - الخميس", teacher: "معلمة مروة" },
-        17: { name: "معلمة روان - الخميس", teacher: "معلمة روان" },
-        18: { name: "معلمة سمر - الخميس", teacher: "معلمة سمر" },
-        19: { name: "معلمة سناء - الخميس", teacher: "معلمة سناء" },
-        20: { name: "معلمة شيماء - الجمعة", teacher: "معلمة شيماء" },
-        21: { name: "معلمة دانا - الجمعة", teacher: "معلمة دانا" },
-        22: { name: "محمود دغميس - الجمعة", teacher: "محمود دغميس" },
-        23: { name: "معلمة أمامة أبو حطب - الجمعة", teacher: "معلمة أمامة أبو حطب" },
-        24: { name: "معلمة بسمة - الجمعة", teacher: "معلمة بسمة" },
-        25: { name: "معلمة ماريا - الجمعة", teacher: "معلمة ماريا" },
-        26: { name: "احمد الشرقاوي - الجمعة", teacher: "أحمد الشرقاوي" },
-        27: { name: "معلم احمد الشرقاوي - الاحد", teacher: "معلم أحمد الشرقاوي" },
-        28: { name: "معلمة يسرا السلطان - الاحد", teacher: "معلمة يسرا السلطان" },
-        29: { name: "الشيخ عمار - الاحد", teacher: "الشيخ عمار" },
-        30: { name: "المعلمة ريعان عسقول - الخميس", teacher: "المعلمة ريعان عسقول" },
-        31: { name: "الشيخ اسامة السلطان - الاحد", teacher: "الشيخ أسامة السلطان" },
-        32: { name: "الشيخ أمين - الاحد", teacher: "الشيخ أمين" },
-        33: { name: "المعلمة سناء - الاربعاء", teacher: "المعلمة سناء" },
-        34: { name: "المعلمة سناء - الاحد", teacher: "المعلمة سناء" },
-        35: { name: "صف النورانية الاول - الخميس", teacher: "معلم النورانية" },
-        36: { name: "صف النورانية الثاني - الخميس", teacher: "معلم النورانية" }
-    };
+        const classes = {
+            1: { name: "معلمة جنين - الاثنين", teacher: "معلمة جنين" },
+            2: { name: "معلمة احلام - الاثنين", teacher: "معلمة أحلام" },
+            3: { name: "معلمة ايات العدوي - الاثنين", teacher: "معلمة آيات العدوي" },
+            4: { name: "معلمة سمر - الاثنين", teacher: "معلمة سمر" },
+            5: { name: "معلمة الاء زيادة - الاثنين", teacher: "معلمة الآء زيادة" },
+            6: { name: "معلمة رانبا - الاثنين", teacher: "معلمة رانبا" },
+            7: { name: "معلم عبادة الاشقر - الاثنين", teacher: "معلم عبادة الأشقر" },
+            8: { name: "معلمة اسماء السلطان - الاثنين", teacher: "معلمة أسماء السلطان" },
+            9: { name: "معلمة سناء - الاثنين", teacher: "معلمة سناء" },
+            10: { name: "معلمة فوزية - الخميس", teacher: "معلمة فوزية" },
+            11: { name: "معلمة ام عمر - الخميس", teacher: "معلمة أم عمر" },
+            12: { name: "معلمة براء - الخميس", teacher: "معلمة براء" },
+            13: { name: "معلمة ناريمان صالح - الخميس", teacher: "معلمة ناريمان صالح" },
+            14: { name: "معلم عثمان الخطيب - الخميس", teacher: "معلم عثمان الخطيب" },
+            15: { name: "معلمة .ام براء - الخميس", teacher: "معلمة أم براء" },
+            16: { name: "معلمة مروة - الخميس", teacher: "معلمة مروة" },
+            17: { name: "معلمة روان - الخميس", teacher: "معلمة روان" },
+            18: { name: "معلمة سمر - الخميس", teacher: "معلمة سمر" },
+            19: { name: "معلمة سناء - الخميس", teacher: "معلمة سناء" },
+            20: { name: "معلمة شيماء - الجمعة", teacher: "معلمة شيماء" },
+            21: { name: "معلمة دانا - الجمعة", teacher: "معلمة دانا" },
+            22: { name: "محمود دغميس - الجمعة", teacher: "محمود دغميس" },
+            23: { name: "معلمة أمامة أبو حطب - الجمعة", teacher: "معلمة أمامة أبو حطب" },
+            24: { name: "معلمة بسمة - الجمعة", teacher: "معلمة بسمة" },
+            25: { name: "معلمة ماريا - الجمعة", teacher: "معلمة ماريا" },
+            26: { name: "احمد الشرقاوي - الجمعة", teacher: "أحمد الشرقاوي" },
+            27: { name: "معلم احمد الشرقاوي - الاحد", teacher: "معلم أحمد الشرقاوي" },
+            28: { name: "معلمة يسرا السلطان - الاحد", teacher: "معلمة يسرا السلطان" },
+            29: { name: "الشيخ عمار - الاحد", teacher: "الشيخ عمار" },
+            30: { name: "المعلمة ريعان عسقول - الخميس", teacher: "المعلمة ريعان عسقول" },
+            31: { name: "الشيخ اسامة السلطان - الاحد", teacher: "الشيخ أسامة السلطان" },
+            32: { name: "الشيخ أمين - الاحد", teacher: "الشيخ أمين" },
+            33: { name: "المعلمة سناء - الاربعاء", teacher: "المعلمة سناء" },
+            34: { name: "المعلمة سناء - الاحد", teacher: "المعلمة سناء" },
+            35: { name: "صف النورانية الاول - الخميس", teacher: "معلم النورانية" },
+            36: { name: "صف النورانية الثاني - الخميس", teacher: "معلم النورانية" }
+        };
 
-    let currentClass = 'غير محدد';
-    let currentTeacher = 'غير محدد';
-    let allStudentsData = [];
-    let studentToDelete = null;
+        let currentClass = 'غير محدد';
+        let currentTeacher = 'غير محدد';
+        let currentClassId = null;
+        let allStudentsData = [];
+        let studentToDelete = null;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // العناصر الرئيسية
-        const addStudentForm = document.getElementById('addStudentForm');
-        const refreshStudentsBtn = document.getElementById('refreshStudentsBtn');
-        const studentsRecords = document.getElementById('studentsRecords');
-        const emptyState = document.getElementById('emptyState');
-        const classNameElement = document.getElementById('className');
-        const teacherNameElement = document.getElementById('teacherName');
-        const studentsCountElement = document.getElementById('studentsCount');
-        const attendanceLink = document.getElementById('attendanceLink');
-        const deleteModal = document.getElementById('deleteModal');
-        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-        const deleteModalClose = document.getElementById('deleteModalClose');
+        document.addEventListener('DOMContentLoaded', function() {
+            // العناصر الرئيسية
+            const addStudentForm = document.getElementById('addStudentForm');
+            const addAbsenceForm = document.getElementById('addAbsenceForm');
+            const refreshStudentsBtn = document.getElementById('refreshStudentsBtn');
+            const studentsRecords = document.getElementById('studentsRecords');
+            const emptyState = document.getElementById('emptyState');
+            const classNameElement = document.getElementById('className');
+            const teacherNameElement = document.getElementById('teacherName');
+            const studentsCountElement = document.getElementById('studentsCount');
+            const studentsCountBadge = document.getElementById('studentsCountBadge');
+            const attendanceLink = document.getElementById('attendanceLink');
+            const deleteModal = document.getElementById('deleteModal');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const deleteModalClose = document.getElementById('deleteModalClose');
 
-        // الحصول على رقم الفصل من الرابط
-        const urlParams = new URLSearchParams(window.location.search);
-        const classNumber = parseInt(urlParams.get('class'));
-        
-        if (classNumber && classes[classNumber]) {
-            currentClass = classes[classNumber].name;
-            currentTeacher = classes[classNumber].teacher;
+            // الحصول على رقم الفصل من الرابط
+            const urlParams = new URLSearchParams(window.location.search);
+            currentClassId = parseInt(urlParams.get('class'));
             
-            // تحديث رابط صفحة الحضور
-            attendanceLink.href = `attendance.html?class=${classNumber}`;
-        } else if (classNumber) {
-            currentClass = `فصل ${classNumber}`;
-            currentTeacher = "معلم الفصل";
-        }
-        
-        // تحديث واجهة المستخدم
-        classNameElement.textContent = `الفصل: ${currentClass}`;
-        teacherNameElement.textContent = currentTeacher;
-        document.getElementById('welcomeTitle').textContent = `مرحباً ${currentTeacher}`;
-        document.getElementById('welcomeSubtitle').textContent = `أنت تدير ${currentClass}`;
+            if (currentClassId && classes[currentClassId]) {
+                currentClass = classes[currentClassId].name;
+                currentTeacher = classes[currentClassId].teacher;
+                
+                // تحديث رابط صفحة الحضور
+                attendanceLink.href = `attendance.html?class=${currentClassId}`;
+            } else if (currentClassId) {
+                currentClass = `فصل ${currentClassId}`;
+                currentTeacher = "معلم الفصل";
+            }
+            
+            // تحديث واجهة المستخدم
+            classNameElement.textContent = `الفصل: ${currentClass}`;
+            teacherNameElement.textContent = `المعلم: ${currentTeacher}`;
+            document.getElementById('welcomeTitle').textContent = `مرحباً ${currentTeacher}`;
+            document.getElementById('welcomeSubtitle').textContent = `أنت تدير ${currentClass}`;
 
-        // أحداث النماذج
-        addStudentForm.addEventListener('submit', handleAddStudent);
-        refreshStudentsBtn.addEventListener('click', fetchStudents);
-        confirmDeleteBtn.addEventListener('click', confirmDelete);
-        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-        deleteModalClose.addEventListener('click', closeDeleteModal);
+            // أحداث النماذج
+            addStudentForm.addEventListener('submit', handleAddStudent);
+            addAbsenceForm.addEventListener('submit', handleAddAbsence);
+            refreshStudentsBtn.addEventListener('click', fetchStudents);
+            confirmDeleteBtn.addEventListener('click', confirmDelete);
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+            deleteModalClose.addEventListener('click', closeDeleteModal);
 
-        // إغلاق النافذة عند النقر خارجها
-        window.addEventListener('click', function(event) {
-            if (event.target === deleteModal) {
-                closeDeleteModal();
+            // إغلاق النافذة عند النقر خارجها
+            window.addEventListener('click', function(event) {
+                if (event.target === deleteModal) {
+                    closeDeleteModal();
+                }
+            });
+
+            // جلب البيانات عند تحميل الصفحة
+            fetchStudents();
+
+            async function handleAddStudent(e) {
+                e.preventDefault();
+                const firstName = document.getElementById('newFirstName').value.trim();
+                const lastName = document.getElementById('newLastName').value.trim();
+
+                if (firstName && lastName) {
+                    try {
+                        showMessage('جاري إضافة الطالب...', 'loading');
+                        
+                        const newStudent = {
+                            first: firstName,
+                            second: lastName,
+                            class: currentClass,
+                            classId: currentClassId,
+                            timestamp: new Date().getTime(),
+                            recordType: 'student'
+                        };
+
+                        // جلب البيانات الحالية أولاً
+                        await fetchStudents();
+                        
+                        // إضافة الطالب الجديد
+                        allStudentsData.push(newStudent);
+                        
+                        // حفظ في JSONBin
+                        await saveToJSONBin(allStudentsData);
+                        
+                        // تحديث العرض
+                        updateStudentsDisplay();
+                        
+                        // مسح الحقول
+                        addStudentForm.reset();
+                        
+                        showMessage('تم إضافة الطالب بنجاح', 'success');
+                    } catch (error) {
+                        console.error('Error adding student:', error);
+                        showMessage('حدث خطأ في إضافة الطالب', 'error');
+                    }
+                } else {
+                    showMessage('يرجى ملء جميع الحقول', 'error');
+                }
+            }
+
+            async function handleAddAbsence(e) {
+                e.preventDefault();
+                const firstName = document.getElementById('absenceFirstName').value.trim();
+                const lastName = document.getElementById('absenceLastName').value.trim();
+
+                if (firstName && lastName) {
+                    try {
+                        showMessage('جاري تسجيل الغياب...', 'loading');
+                        
+                        const now = new Date();
+                        const newAbsence = {
+                            first: firstName,
+                            second: lastName,
+                            class: currentClass,
+                            classId: currentClassId,
+                            attendance: 'غياب',
+                            time: now.toLocaleString('ar-SA'),
+                            timestamp: now.getTime(),
+                            recordType: 'attendance'
+                        };
+
+                        // جلب البيانات الحالية أولاً
+                        await fetchStudents();
+                        
+                        // إضافة تسجيل الغياب
+                        allStudentsData.push(newAbsence);
+                        
+                        // حفظ في JSONBin
+                        await saveToJSONBin(allStudentsData);
+                        
+                        // تحديث العرض
+                        updateStudentsDisplay();
+                        
+                        // مسح الحقول
+                        addAbsenceForm.reset();
+                        
+                        showMessage('تم تسجيل الغياب بنجاح', 'success');
+                    } catch (error) {
+                        console.error('Error adding absence:', error);
+                        showMessage('حدث خطأ في تسجيل الغياب', 'error');
+                    }
+                } else {
+                    showMessage('يرجى ملء جميع الحقول', 'error');
+                }
+            }
+
+            function openDeleteModal(student, index) {
+                studentToDelete = { student, index };
+                document.getElementById('deleteMessage').textContent = 
+                    `هل أنت متأكد من أنك تريد حذف ${student.first} ${student.second}؟`;
+                deleteModal.style.display = 'flex';
+            }
+
+            function closeDeleteModal() {
+                deleteModal.style.display = 'none';
+                studentToDelete = null;
+            }
+
+            async function confirmDelete() {
+                if (studentToDelete) {
+                    try {
+                        showMessage('جاري حذف الطالب...', 'loading');
+                        
+                        // إزالة الطالب من البيانات
+                        allStudentsData.splice(studentToDelete.index, 1);
+                        
+                        // حفظ في JSONBin
+                        await saveToJSONBin(allStudentsData);
+                        
+                        // تحديث العرض
+                        updateStudentsDisplay();
+                        
+                        showMessage('تم حذف الطالب بنجاح', 'success');
+                        closeDeleteModal();
+                    } catch (error) {
+                        console.error('Error deleting student:', error);
+                        showMessage('حدث خطأ في حذف الطالب', 'error');
+                    }
+                }
+            }
+
+            async function fetchStudents() {
+                try {
+                    showMessage('جاري تحميل البيانات...', 'loading');
+                    
+                    const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
+                        headers: {
+                            'X-Master-Key': JSONBIN_CONFIG.API_KEY
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    allStudentsData = result.record || [];
+                    
+                    console.log('تم جلب البيانات:', allStudentsData);
+                    updateStudentsDisplay();
+                    showMessage('تم تحميل البيانات بنجاح', 'success');
+                    
+                } catch (error) {
+                    console.error('Error fetching students data:', error);
+                    showMessage('خطأ في تحميل البيانات', 'error');
+                    // استخدام بيانات تجريبية للاختبار
+                    allStudentsData = [];
+                    updateStudentsDisplay();
+                }
+            }
+
+            function updateStudentsDisplay() {
+                // تصفية الطلاب المسجلين للفصل الحالي فقط
+                const registeredStudents = allStudentsData.filter(student => 
+                    (student.class === currentClass || student.classId === currentClassId) && 
+                    student.recordType === 'student'
+                );
+
+                // تصفية تسجيلات الغياب للفصل الحالي فقط
+                const absenceRecords = allStudentsData.filter(record => 
+                    (record.class === currentClass || record.classId === currentClassId) && 
+                    record.recordType === 'attendance' && 
+                    record.attendance === 'غياب'
+                );
+
+                studentsRecords.innerHTML = '';
+
+                if (registeredStudents.length === 0 && absenceRecords.length === 0) {
+                    emptyState.style.display = 'block';
+                    studentsCountElement.textContent = 'عدد الطلاب: 0';
+                    studentsCountBadge.textContent = '0 طالب';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                studentsCountElement.textContent = `عدد الطلاب: ${registeredStudents.length}`;
+                studentsCountBadge.textContent = `${registeredStudents.length} طالب`;
+
+                // عرض الطلاب المسجلين
+                registeredStudents.forEach((student, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <div class="student-info">
+                            <span class="student-name">${student.first} ${student.second}</span>
+                            <span class="student-class">${student.class}</span>
+                        </div>
+                        <div class="student-actions">
+                            <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(student)}">
+                                حذف
+                            </button>
+                        </div>
+                    `;
+                    studentsRecords.appendChild(listItem);
+                });
+
+                // عرض تسجيلات الغياب
+                if (absenceRecords.length > 0) {
+                    const absenceTitle = document.createElement('li');
+                    absenceTitle.style.cssText = 'background: #fff3cd; border-left: 4px solid var(--warning-color); font-weight: bold; color: #856404; justify-content: center;';
+                    absenceTitle.innerHTML = `<div>تسجيلات الغياب</div>`;
+                    studentsRecords.appendChild(absenceTitle);
+
+                    absenceRecords.forEach((record, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'absence-item';
+                        listItem.innerHTML = `
+                            <div class="student-info">
+                                <span class="student-name">${record.first} ${record.second}</span>
+                                <span class="attendance-badge attendance-absent">غياب</span>
+                                <span class="student-class">${record.time || 'غير محدد'}</span>
+                            </div>
+                            <div class="student-actions">
+                                <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(record)}">
+                                    حذف
+                                </button>
+                            </div>
+                        `;
+                        studentsRecords.appendChild(listItem);
+                    });
+                }
+
+                // إضافة أحداث الحذف
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        if (!isNaN(index) && allStudentsData[index]) {
+                            openDeleteModal(allStudentsData[index], index);
+                        }
+                    });
+                });
+            }
+
+            // وظيفة لحفظ البيانات في JSONBin
+            async function saveToJSONBin(data) {
+                try {
+                    const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': JSONBIN_CONFIG.API_KEY,
+                            'X-Bin-Versioning': 'false'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error saving to JSONBin:', error);
+                    throw error;
+                }
+            }
+
+            // وظيفة لعرض الرسائل
+            function showMessage(message, type) {
+                const existingMessage = document.querySelector('.message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${type}`;
+                messageElement.textContent = message;
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'close-btn';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.addEventListener('click', function() {
+                    messageElement.remove();
+                });
+                
+                messageElement.appendChild(closeBtn);
+                document.body.appendChild(messageElement);
+                
+                setTimeout(() => {
+                    if (messageElement.parentNode) {
+                        messageElement.remove();
+                    }
+                }, 3000);
             }
         });
-
-        // جلب البيانات عند تحميل الصفحة
-        fetchStudents();
-
-        async function handleAddStudent(e) {
-            e.preventDefault();
-            const firstName = document.getElementById('newFirstName').value.trim();
-            const lastName = document.getElementById('newLastName').value.trim();
-
-            if (firstName && lastName) {
-                try {
-                    const newStudent = {
-                        first: firstName,
-                        second: lastName,
-                        class: currentClass,
-                        timestamp: new Date().getTime()
-                    };
-
-                    // جلب البيانات الحالية أولاً
-                    await fetchStudents();
-                    
-                    // إضافة الطالب الجديد
-                    allStudentsData.push(newStudent);
-                    
-                    // حفظ في JSONBin
-                    await saveToJSONBin(allStudentsData);
-                    
-                    // تحديث العرض
-                    updateStudentsDisplay();
-                    
-                    // مسح الحقول
-                    addStudentForm.reset();
-                    
-                    showMessage('تم إضافة الطالب بنجاح', 'success');
-                } catch (error) {
-                    console.error('Error adding student:', error);
-                    showMessage('حدث خطأ في إضافة الطالب', 'error');
-                }
-            } else {
-                showMessage('يرجى ملء جميع الحقول', 'error');
-            }
-        }
-
-        function openDeleteModal(student, index) {
-            studentToDelete = { student, index };
-            document.getElementById('deleteMessage').textContent = 
-                `هل أنت متأكد من أنك تريد حذف الطالب ${student.first} ${student.second}؟`;
-            deleteModal.style.display = 'flex';
-        }
-
-        function closeDeleteModal() {
-            deleteModal.style.display = 'none';
-            studentToDelete = null;
-        }
-
-        async function confirmDelete() {
-            if (studentToDelete) {
-                try {
-                    // إزالة الطالب من البيانات
-                    allStudentsData.splice(studentToDelete.index, 1);
-                    
-                    // حفظ في JSONBin
-                    await saveToJSONBin(allStudentsData);
-                    
-                    // تحديث العرض
-                    updateStudentsDisplay();
-                    
-                    showMessage('تم حذف الطالب بنجاح', 'success');
-                    closeDeleteModal();
-                } catch (error) {
-                    console.error('Error deleting student:', error);
-                    showMessage('حدث خطأ في حذف الطالب', 'error');
-                }
-            }
-        }
-
-        async function fetchStudents() {
-            try {
-                showMessage('جاري تحميل البيانات...', 'loading');
-                
-                const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': JSONBIN_CONFIG.API_KEY
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                allStudentsData = result.record || [];
-                
-                updateStudentsDisplay();
-                
-            } catch (error) {
-                console.error('Error fetching students data:', error);
-                showMessage('خطأ في تحميل البيانات', 'error');
-            }
-        }
-
-        function updateStudentsDisplay() {
-            // تصفية الطلاب للفصل الحالي فقط
-            const classStudents = allStudentsData.filter(student => 
-                student.class === currentClass
-            );
-
-            studentsRecords.innerHTML = '';
-
-            if (classStudents.length === 0) {
-                emptyState.style.display = 'block';
-                studentsCountElement.textContent = '0';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            studentsCountElement.textContent = classStudents.length;
-
-            // عرض الطلاب
-            classStudents.forEach((student, index) => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <div class="student-info">
-                        <span class="student-name">${student.first} ${student.second}</span>
-                        <span class="student-class">${student.class}</span>
-                    </div>
-                    <div class="student-actions">
-                        <button class="btn btn-danger btn-small delete-btn" data-index="${index}">
-                            حذف
-                        </button>
-                    </div>
-                `;
-                studentsRecords.appendChild(listItem);
-            });
-
-            // إضافة أحداث الحذف
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const classStudents = allStudentsData.filter(student => 
-                        student.class === currentClass
-                    );
-                    const actualIndex = allStudentsData.indexOf(classStudents[index]);
-                    openDeleteModal(classStudents[index], actualIndex);
-                });
-            });
-        }
-
-        // وظيفة لحفظ البيانات في JSONBin
-        async function saveToJSONBin(data) {
-            const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': JSONBIN_CONFIG.API_KEY
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            return await response.json();
-        }
-
-        // وظيفة لعرض الرسائل
-        function showMessage(message, type) {
-            const existingMessage = document.querySelector('.message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-            
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${type}`;
-            messageElement.textContent = message;
-            
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-btn';
-            closeBtn.innerHTML = '&times;';
-            closeBtn.addEventListener('click', function() {
-                messageElement.remove();
-            });
-            
-            messageElement.appendChild(closeBtn);
-            document.body.appendChild(messageElement);
-            
-            setTimeout(() => {
-                if (messageElement.parentNode) {
-                    messageElement.remove();
-                }
-            }, 3000);
-        }
-    });
-</script>
+    </script>
 </body>
 </html>
