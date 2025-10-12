@@ -499,6 +499,32 @@
             font-size: 18px;
             margin: 0;
         }
+        
+        .students-count-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .attendance-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .attendance-title {
+            background: #fff3cd;
+            border-left: 4px solid var(--warning-color);
+            font-weight: bold;
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -847,8 +873,7 @@
                     
                 } catch (error) {
                     console.error('Error fetching students data:', error);
-                    showMessage('خطأ في تحميل البيانات', 'error');
-                    // استخدام بيانات تجريبية للاختبار
+                    showMessage('خطأ في تحميل البيانات من JSONBin', 'error');
                     allStudentsData = [];
                     updateStudentsDisplay();
                 }
@@ -861,16 +886,15 @@
                     student.recordType === 'student'
                 );
 
-                // تصفية تسجيلات الغياب للفصل الحالي فقط
-                const absenceRecords = allStudentsData.filter(record => 
+                // تصفية تسجيلات الحضور للفصل الحالي فقط
+                const attendanceRecords = allStudentsData.filter(record => 
                     (record.class === currentClass || record.classId === currentClassId) && 
-                    record.recordType === 'attendance' && 
-                    record.attendance === 'غياب'
+                    record.recordType === 'attendance'
                 );
 
                 studentsRecords.innerHTML = '';
 
-                if (registeredStudents.length === 0 && absenceRecords.length === 0) {
+                if (registeredStudents.length === 0 && attendanceRecords.length === 0) {
                     emptyState.style.display = 'block';
                     studentsCountElement.textContent = 'عدد الطلاب: 0';
                     studentsCountBadge.textContent = '0 طالب';
@@ -882,46 +906,84 @@
                 studentsCountBadge.textContent = `${registeredStudents.length} طالب`;
 
                 // عرض الطلاب المسجلين
-                registeredStudents.forEach((student, index) => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `
-                        <div class="student-info">
-                            <span class="student-name">${student.first} ${student.second}</span>
-                            <span class="student-class">${student.class}</span>
-                        </div>
-                        <div class="student-actions">
-                            <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(student)}">
-                                حذف
-                            </button>
-                        </div>
-                    `;
-                    studentsRecords.appendChild(listItem);
-                });
-
-                // عرض تسجيلات الغياب
-                if (absenceRecords.length > 0) {
-                    const absenceTitle = document.createElement('li');
-                    absenceTitle.style.cssText = 'background: #fff3cd; border-left: 4px solid var(--warning-color); font-weight: bold; color: #856404; justify-content: center;';
-                    absenceTitle.innerHTML = `<div>تسجيلات الغياب</div>`;
-                    studentsRecords.appendChild(absenceTitle);
-
-                    absenceRecords.forEach((record, index) => {
+                if (registeredStudents.length > 0) {
+                    registeredStudents.forEach((student, index) => {
                         const listItem = document.createElement('li');
-                        listItem.className = 'absence-item';
                         listItem.innerHTML = `
                             <div class="student-info">
-                                <span class="student-name">${record.first} ${record.second}</span>
-                                <span class="attendance-badge attendance-absent">غياب</span>
-                                <span class="student-class">${record.time || 'غير محدد'}</span>
+                                <span class="student-name">${student.first} ${student.second}</span>
+                                <span class="student-class">${student.class}</span>
                             </div>
                             <div class="student-actions">
-                                <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(record)}">
+                                <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(student)}">
                                     حذف
                                 </button>
                             </div>
                         `;
                         studentsRecords.appendChild(listItem);
                     });
+                }
+
+                // عرض تسجيلات الحضور والغياب
+                if (attendanceRecords.length > 0) {
+                    const attendanceSection = document.createElement('div');
+                    attendanceSection.className = 'attendance-section';
+                    
+                    const attendanceTitle = document.createElement('div');
+                    attendanceTitle.className = 'attendance-title';
+                    attendanceTitle.textContent = 'سجلات الحضور والغياب';
+                    attendanceSection.appendChild(attendanceTitle);
+                    
+                    const attendanceList = document.createElement('ul');
+                    attendanceList.style.listStyleType = 'none';
+                    
+                    // عرض سجلات الحضور
+                    const presentRecords = attendanceRecords.filter(record => record.attendance === 'حضور');
+                    const absentRecords = attendanceRecords.filter(record => record.attendance === 'غياب');
+                    
+                    if (presentRecords.length > 0) {
+                        presentRecords.forEach((record, index) => {
+                            const listItem = document.createElement('li');
+                            listItem.style.cssText = 'background: #e8f6ef; border-left: 4px solid var(--secondary-color);';
+                            listItem.innerHTML = `
+                                <div class="student-info">
+                                    <span class="student-name">${record.first} ${record.second}</span>
+                                    <span class="attendance-badge attendance-present">حضور</span>
+                                    <span class="student-class">${record.time || 'غير محدد'}</span>
+                                </div>
+                                <div class="student-actions">
+                                    <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(record)}">
+                                        حذف
+                                    </button>
+                                </div>
+                            `;
+                            attendanceList.appendChild(listItem);
+                        });
+                    }
+                    
+                    // عرض سجلات الغياب
+                    if (absentRecords.length > 0) {
+                        absentRecords.forEach((record, index) => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'absence-item';
+                            listItem.innerHTML = `
+                                <div class="student-info">
+                                    <span class="student-name">${record.first} ${record.second}</span>
+                                    <span class="attendance-badge attendance-absent">غياب</span>
+                                    <span class="student-class">${record.time || 'غير محدد'}</span>
+                                </div>
+                                <div class="student-actions">
+                                    <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(record)}">
+                                        حذف
+                                    </button>
+                                </div>
+                            `;
+                            attendanceList.appendChild(listItem);
+                        });
+                    }
+                    
+                    attendanceSection.appendChild(attendanceList);
+                    studentsRecords.appendChild(attendanceSection);
                 }
 
                 // إضافة أحداث الحذف
