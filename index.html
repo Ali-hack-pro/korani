@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- نفس الستايل السابق - لا تغيير -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام تسجيل الحضور والغياب</title>
@@ -485,8 +486,12 @@
     </div>
 
 <script>
-    // استبدل هذا الرابط برابط نشر تطبيق الويب الخاص بك
-    const API_URL = 'https://script.google.com/macros/s/AKfycby58GdjjpPFXdmeqDwhomlvphVNY2_ycBQ59kWbZbxwcTsCTtJq-0D5tEp1mNHJnPQIXw/exec';
+    // إعدادات JSONBin.io - ضع معلوماتك هنا
+    const JSONBIN_CONFIG = {
+        BIN_ID: 'YOUR_BIN_ID_HERE', // استبدل هذا بمعرف الـ Bin الخاص بك
+        API_KEY: 'YOUR_MASTER_KEY_HERE', // استبدل هذا بمفتاح API الخاص بك
+        BASE_URL: 'https://api.jsonbin.io/v3/b'
+    };
     
     const classes = {
         1: "معلمة جنين - الاثنين", 2: "معلمة احلام - الاثنين", 3: "معلمة ايات العدوي - الاثنين",
@@ -507,7 +512,8 @@
     let refreshInterval;
     let currentLang = 'ar';
     let currentClass = 'غير محدد';
-    
+    let allAttendanceData = [];
+
     document.addEventListener('DOMContentLoaded', function() {
         // العناصر الرئيسية
         const form = document.getElementById('attendanceForm');
@@ -612,11 +618,9 @@
         
         // بدء التحديث التلقائي
         function startAutoRefresh() {
-            // إيقاف أي تحديث سابق
             if (refreshInterval) {
                 clearInterval(refreshInterval);
             }
-            // تحديث البيانات كل 10 ثوانٍ
             refreshInterval = setInterval(fetchAttendance, 10000);
             console.log('Auto-refresh started: updating every 10 seconds');
         }
@@ -655,7 +659,7 @@
         });
         
         // وظيفة تسجيل الحضور/الغياب
-        function registerAttendance(firstName, lastName, isMainStudent, attendanceType) {
+        async function registerAttendance(firstName, lastName, isMainStudent, attendanceType) {
             if (firstName && lastName) {
                 // حفظ بيانات الطالب الأساسي في الكوكي
                 if (isMainStudent && attendanceType === 'حضور') {
@@ -669,121 +673,92 @@
                     (attendanceType === 'حضور' ? 'جاري تسجيل الحضور...' : 'جاري تسجيل الغياب...') :
                     (attendanceType === 'حضور' ? 'Anwesenheit wird registriert...' : 'Abwesenheit wird registriert...'), 'loading');
                 
-                // إنشاء رابط API مع المعلمات
-                const url = `${API_URL}?action=add&first=${encodeURIComponent(firstName)}&second=${encodeURIComponent(lastName)}&class=${encodeURIComponent(currentClass)}&time=${encodeURIComponent(timeString)}&attendance=${encodeURIComponent(attendanceType)}`;
-                
-                console.log('Sending request to:', url);
-                
-                // استخدام fetch
-                fetch(url)
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    return response.text();
-                })
-                .then(result => {
-                    console.log('API Response:', result);
+                try {
+                    // إنشاء السجل الجديد
+                    const newRecord = {
+                        first: firstName,
+                        second: lastName,
+                        class: currentClass,
+                        time: timeString,
+                        attendance: attendanceType,
+                        timestamp: now.getTime()
+                    };
                     
-                    try {
-                        const data = JSON.parse(result);
-                        if (data.status === "success") {
-                            // إخفاء رسالة عدم وجود بيانات
-                            if (emptyState.style.display !== 'none') {
-                                emptyState.style.display = 'none';
-                            }
-                            
-                            // إضافة السجل محلياً
-                            const listItem = document.createElement('li');
-                            listItem.className = attendanceType === 'حضور' ? 'attendance-item' : 'absence-item';
-                            listItem.innerHTML = `
-                                <div>
-                                    <span class="student-name">${firstName} ${lastName}</span>
-                                    <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
-                                        ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
-                                    </span>
-                                </div>
-                                <span class="timestamp">${timeString}</span>
-                            `;
-                            
-                            attendanceRecords.prepend(listItem);
-                            
-                            // مسح الحقول للطالب الأساسي فقط
-                            if (isMainStudent && attendanceType === 'حضور') {
-                                lastNameInput.value = '';
-                            }
-                            
-                            // عرض رسالة نجاح
-                            const successMessage = attendanceType === 'حضور' ? 
-                                texts[currentLang].successMessage : texts[currentLang].absenceSuccessMessage;
-                            showMessage(successMessage.replace('{name}', `${firstName} ${lastName}`), 'success');
-                            
-                            // جلب البيانات المحدثة من السيرفر بعد ثانية
-                            setTimeout(fetchAttendance, 1000);
-                        } else {
-                            throw new Error(data.message || 'Unknown error');
-                        }
-                    } catch (error) {
-                        console.error('Error parsing response:', error);
-                        showMessage(currentLang === 'ar' ? 
-                            (attendanceType === 'حضور' ? 'حدث خطأ في تسجيل الحضور' : 'حدث خطأ في تسجيل الغياب') :
-                            (attendanceType === 'حضور' ? 'Fehler bei der Anwesenheitsregistrierung' : 'Fehler bei der Abwesenheitsregistrierung'), 'error');
+                    // إضافة السجل إلى البيانات المحلية
+                    allAttendanceData.push(newRecord);
+                    
+                    // حفظ البيانات في JSONBin
+                    await saveToJSONBin(allAttendanceData);
+                    
+                    // إخفاء رسالة عدم وجود بيانات
+                    if (emptyState.style.display !== 'none') {
+                        emptyState.style.display = 'none';
                     }
-                })
-                .catch(error => {
+                    
+                    // تحديث العرض المحلي
+                    updateAttendanceDisplay();
+                    
+                    // مسح الحقول للطالب الأساسي فقط
+                    if (isMainStudent && attendanceType === 'حضور') {
+                        lastNameInput.value = '';
+                    }
+                    
+                    // عرض رسالة نجاح
+                    const successMessage = attendanceType === 'حضور' ? 
+                        texts[currentLang].successMessage : texts[currentLang].absenceSuccessMessage;
+                    showMessage(successMessage.replace('{name}', `${firstName} ${lastName}`), 'success');
+                    
+                } catch (error) {
                     console.error('Error:', error);
                     showMessage(currentLang === 'ar' ? 
                         (attendanceType === 'حضور' ? 'حدث خطأ في تسجيل الحضور' : 'حدث خطأ في تسجيل الغياب') :
                         (attendanceType === 'حضور' ? 'Fehler bei der Anwesenheitsregistrierung' : 'Fehler bei der Abwesenheitsregistrierung'), 'error');
-                });
+                }
             } else {
                 showMessage(texts[currentLang].errorMessage, 'error');
             }
         }
         
-        // وظيفة لجلب بيانات الحضور من API
-        function fetchAttendance() {
-            const url = `${API_URL}?action=get`;
-            console.log('Fetching data from:', url);
+        // وظيفة لحفظ البيانات في JSONBin
+        async function saveToJSONBin(data) {
+            const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': JSONBIN_CONFIG.API_KEY
+                },
+                body: JSON.stringify(data)
+            });
             
-            fetch(url)
-            .then(response => {
-                console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        // وظيفة لجلب البيانات من JSONBin
+        async function fetchAttendance() {
+            try {
+                const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': JSONBIN_CONFIG.API_KEY
+                    }
+                });
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return response.text();
-            })
-            .then(text => {
-                console.log('Raw response:', text);
-                try {
-                    // محاولة تحليل النص كـ JSON
-                    const data = JSON.parse(text);
-                    console.log('Parsed data:', data);
-                    
-                    // إذا كانت البيانات مصفوفة مباشرة (بدون كائن status)
-                    if (Array.isArray(data)) {
-                        processAttendanceData(data);
-                    } 
-                    // إذا كانت البيانات في كائن مع خاصية data
-                    else if (data.data && Array.isArray(data.data)) {
-                        processAttendanceData(data.data);
-                    }
-                    // إذا كانت هناك حالة خطأ
-                    else if (data.status === "error") {
-                        throw new Error(data.message);
-                    }
-                    else {
-                        throw new Error('Invalid data format');
-                    }
-                } catch (e) {
-                    console.error('Error parsing JSON:', e);
-                    console.log('Response text:', text);
-                    showLoadError();
-                }
-            })
-            .catch(error => {
+                
+                const result = await response.json();
+                allAttendanceData = result.record || [];
+                
+                processAttendanceData(allAttendanceData);
+                
+            } catch (error) {
                 console.error('Error fetching attendance data:', error);
                 showLoadError();
-            });
+            }
         }
         
         function processAttendanceData(data) {
@@ -829,6 +804,11 @@
                 emptyState.style.display = 'block';
                 console.log('No data found for class:', currentClass);
             }
+        }
+        
+        // وظيفة لتحديث العرض المحلي
+        function updateAttendanceDisplay() {
+            processAttendanceData(allAttendanceData);
         }
         
         function showLoadError() {
