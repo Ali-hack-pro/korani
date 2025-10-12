@@ -155,93 +155,103 @@
             text-align: center;
         }
         
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+        .search-section {
             margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            text-align: center;
-            border-top: 4px solid var(--primary-color);
-        }
-        
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            color: #777;
-            font-size: 14px;
-        }
-        
-        .admin-sections {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .section {
-            background: var(--light-bg);
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        .section h3 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-            text-align: right;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
-        
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        select:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
         
         .search-box {
+            position: relative;
             margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+        }
+        
+        .search-results {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: white;
+        }
+
+        /* تخصيص شريط التمرير للبحث */
+        .search-results::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .search-results::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .search-results::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+        }
+
+        .search-results::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2980b9, #1f6392);
+        }
+        
+        .search-result-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-type {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .type-class {
+            background-color: var(--primary-color);
+        }
+        
+        .type-student {
+            background-color: var(--secondary-color);
         }
         
         .classes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
         }
         
         .class-card {
@@ -251,6 +261,7 @@
             box-shadow: var(--shadow);
             border-left: 4px solid var(--primary-color);
             transition: transform 0.3s;
+            cursor: pointer;
         }
         
         .class-card:hover {
@@ -276,48 +287,133 @@
             font-size: 14px;
         }
         
-        .class-actions {
-            display: flex;
-            gap: 10px;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
         }
         
-        .students-list {
-            margin-top: 30px;
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
-            max-height: 500px;
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
             overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        /* تخصيص شريط التمرير للنوافذ */
+        .modal-content::-webkit-scrollbar {
+            width: 14px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+            margin: 5px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            border: 3px solid #f1f1f1;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2980b9, #1f6392);
         }
         
-        .students-list h2 {
-            margin-bottom: 15px;
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 20px;
             color: var(--primary-color);
+            margin: 0;
         }
         
-        #studentsRecords {
-            list-style-type: none;
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
         }
         
-        #studentsRecords li {
+        .class-students-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        /* تخصيص شريط التمرير لقائمة الطلاب */
+        .class-students-list::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .class-students-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .class-students-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+        }
+
+        .class-students-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2980b9, #1f6392);
+        }
+        
+        .student-item {
             padding: 12px 15px;
             margin-bottom: 10px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s;
-            animation: fadeIn 0.5s ease;
             background-color: #e8f4fc;
             border-left: 4px solid var(--primary-color);
+            transition: all 0.3s;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .student-item.highlight {
+            animation: highlight 2s ease;
+            border-left-color: var(--warning-color);
         }
         
-        #studentsRecords li:hover {
-            transform: translateX(5px);
+        @keyframes highlight {
+            0%, 100% { 
+                background-color: #e8f4fc;
+                border-left-color: var(--primary-color);
+            }
+            50% { 
+                background-color: #fff3cd;
+                border-left-color: var(--warning-color);
+                transform: scale(1.02);
+            }
         }
         
         .student-info {
@@ -328,14 +424,6 @@
         
         .student-name {
             font-weight: bold;
-        }
-        
-        .student-class {
-            color: #777;
-            font-size: 14px;
-            background: #ddd;
-            padding: 2px 8px;
-            border-radius: 12px;
         }
         
         .student-actions {
@@ -408,55 +496,51 @@
             justify-content: center;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        .form-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="text"] {
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
         
-        .modal-content {
-            background-color: white;
-            padding: 30px;
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        /* تخصيص شريط التمرير العام */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
             border-radius: 10px;
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 500px;
-            animation: slideUp 0.3s ease;
         }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
         }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .modal-title {
-            font-size: 20px;
-            color: var(--primary-color);
-            margin: 0;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #777;
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2980b9, #1f6392);
         }
         
         @media (max-width: 768px) {
@@ -473,10 +557,6 @@
                 width: 100%;
                 justify-content: center;
                 margin-top: 10px;
-            }
-            
-            .admin-sections {
-                grid-template-columns: 1fr;
             }
             
             .classes-grid {
@@ -503,18 +583,37 @@
             flex-direction: row-reverse;
         }
         
-        body[dir="ltr"] #studentsRecords li:hover {
-            transform: translateX(-5px);
-        }
-        
-        body[dir="ltr"] .message {
-            right: auto;
-            left: 20px;
+        body[dir="ltr"] .search-icon {
+            left: auto;
+            right: 20px;
         }
         
         body[dir="ltr"] .form-group {
             text-align: left;
         }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        .absence-input {
+    background-color: #ffe6e6;
+    border: 2px solid #ff9999;
+}
+
+.absence-input:focus {
+    background-color: #ffcccc;
+    border-color: #ff6666;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 102, 102, 0.2);
+}
     </style>
 </head>
 <body>
@@ -536,79 +635,100 @@
                 <p>إدارة جميع الفصول والطلاب في نظام واحد</p>
             </div>
             
-            <div class="stats-cards">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalClasses">0</div>
-                    <div class="stat-label">عدد الفصول</div>
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="globalSearch" placeholder="ابحث عن فصل أو طالب...">
+                    <span class="search-icon">🔍</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="totalStudents">0</div>
-                    <div class="stat-label">إجمالي الطلاب</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="totalAttendance">0</div>
-                    <div class="stat-label">سجل الحضور</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="todayRecords">0</div>
-                    <div class="stat-label">تسجيلات اليوم</div>
+                <div class="search-results" id="searchResults" style="display: none;">
+                    <!-- نتائج البحث تظهر هنا -->
                 </div>
             </div>
             
-            <div class="admin-sections">
-                <div class="section">
-                    <h3>إضافة طالب جديد</h3>
-                    <form id="addStudentForm">
-                        <div class="form-group">
-                            <label for="newFirstName">الاسم الأول</label>
-                            <input type="text" id="newFirstName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="newLastName">الاسم الثاني</label>
-                            <input type="text" id="newLastName" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="studentClass">الفصل</label>
-                            <select id="studentClass" required>
-                                <option value="">اختر الفصل</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-success" style="width: 100%;">
-                            إضافة الطالب
-                        </button>
-                    </form>
-                </div>
-                
-                <div class="section">
-                    <h3>بحث عن طالب</h3>
-                    <div class="search-box">
-                        <input type="text" id="searchStudent" placeholder="ابحث باسم الطالب..." 
-                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
-                    </div>
-                    
-                    <h3>إجراءات سريعة</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="btn btn-primary" id="manageClassesBtn">إدارة الفصول</button>
-                        <button class="btn btn-warning" id="exportDataBtn">تصدير البيانات</button>
-                    </div>
-                </div>
-            </div>
-            
+            <h2 style="margin-bottom: 20px; color: var(--primary-color);">جميع الفصول</h2>
             <div class="classes-grid" id="classesGrid">
                 <!-- الفصول سيتم إضافتها هنا بالجافاسكريبت -->
             </div>
+        </div>
+    </div>
+
+    <!-- نافذة إدارة الفصل -->
+    <div class="modal" id="classModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="classModalTitle">إدارة الفصل</h3>
+                <button class="modal-close" id="classModalClose">&times;</button>
+            </div>
             
-            <div class="students-list">
-                <h2>جميع الطلاب المسجلين</h2>
-                <ul id="studentsRecords">
-                    <li class="empty-state" id="emptyState">لا يوجد طلاب مسجلين بعد</li>
-                </ul>
+            <div class="search-box" style="margin-bottom: 20px;">
+                <input type="text" id="classSearch" placeholder="ابحث عن طالب في الفصل...">
+                <span class="search-icon">🔍</span>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-success" id="addStudentBtn">إضافة طالب</button>
+                <button class="btn btn-warning" id="addAbsenceBtn">إضافة غياب</button>
+                <button class="btn btn-danger" id="clearClassAttendanceBtn">حذف حضور الفصل</button>
+            </div>
+            
+            <div class="class-students-list" id="classStudentsList">
+                <!-- طلاب الفصل يظهرون هنا -->
             </div>
         </div>
     </div>
+
+    <!-- نافذة إضافة طالب -->
+    <div class="modal" id="addStudentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة طالب جديد</h3>
+                <button class="modal-close" id="addStudentModalClose">&times;</button>
+            </div>
+            <form id="addStudentForm">
+                <div class="form-group">
+                    <label for="newFirstName">الاسم الأول</label>
+                    <input type="text" id="newFirstName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newLastName">الاسم الثاني</label>
+                    <input type="text" id="newLastName" required>
+                </div>
+                
+                <input type="hidden" id="selectedClass">
+                
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    إضافة الطالب
+                </button>
+            </form>
+        </div>
+    </div>
+<!-- نافذة إضافة غياب -->
+<div class="modal" id="addAbsenceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">إضافة غياب طالب</h3>
+            <button class="modal-close" id="addAbsenceModalClose">&times;</button>
+        </div>
+        <form id="addAbsenceForm">
+            <div class="form-group">
+                <label for="absenceFirstName">الاسم الأول</label>
+                <input type="text" id="absenceFirstName" class="absence-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="absenceLastName">الاسم الثاني</label>
+                <input type="text" id="absenceLastName" class="absence-input" required>
+            </div>
+            
+            <input type="hidden" id="absenceSelectedClass">
+            
+            <button type="submit" class="btn btn-warning" style="width: 100%;">
+                تسجيل الغياب
+            </button>
+        </form>
+    </div>
+</div>
 
     <!-- نافذة تأكيد الحذف -->
     <div class="modal" id="deleteModal">
@@ -636,9 +756,6 @@
                 ⚠️ تحذير: هذا الإجراء لا يمكن التراجع عنه!
             </p>
             <p>هل أنت متأكد من أنك تريد حذف جميع بيانات الطلاب والحضور؟</p>
-            <p style="font-size: 14px; color: #777; margin-top: 10px;">
-                (هذا مفيد في نهاية اليوم الدراسي لبدء يوم جديد)
-            </p>
             <div class="buttons-container" style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="btn btn-danger" id="confirmClearAllBtn">نعم، احذف الكل</button>
                 <button class="btn btn-primary" id="cancelClearAllBtn">إلغاء</button>
@@ -695,110 +812,324 @@
 
     let allStudentsData = [];
     let studentToDelete = null;
+    let currentClassModal = null;
+    let studentToHighlight = null;
 
     document.addEventListener('DOMContentLoaded', function() {
         // العناصر الرئيسية
-        const addStudentForm = document.getElementById('addStudentForm');
+        const globalSearch = document.getElementById('globalSearch');
+        const searchResults = document.getElementById('searchResults');
+        const classesGrid = document.getElementById('classesGrid');
         const refreshBtn = document.getElementById('refreshBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
-        const searchStudentInput = document.getElementById('searchStudent');
-        const studentsRecords = document.getElementById('studentsRecords');
-        const emptyState = document.getElementById('emptyState');
-        const classesGrid = document.getElementById('classesGrid');
-        const studentClassSelect = document.getElementById('studentClass');
+        
+        // النوافذ
+        const classModal = document.getElementById('classModal');
+        const addStudentModal = document.getElementById('addStudentModal');
+        const addAbsenceModal = document.getElementById('addAbsenceModal');
         const deleteModal = document.getElementById('deleteModal');
+        const clearAllModal = document.getElementById('clearAllModal');
+        
+        // الأزرار والنماذج
+        const addStudentForm = document.getElementById('addStudentForm');
+        const addAbsenceForm = document.getElementById('addAbsenceForm');
+        const classSearch = document.getElementById('classSearch');
+        const addStudentBtn = document.getElementById('addStudentBtn');
+        const addAbsenceBtn = document.getElementById('addAbsenceBtn');
+        const clearClassAttendanceBtn = document.getElementById('clearClassAttendanceBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-        const deleteModalClose = document.getElementById('deleteModalClose');
-        const clearAllModal = document.getElementById('clearAllModal');
         const confirmClearAllBtn = document.getElementById('confirmClearAllBtn');
         const cancelClearAllBtn = document.getElementById('cancelClearAllBtn');
-        const clearAllModalClose = document.getElementById('clearAllModalClose');
 
-        // تعبئة اختيار الفصول
-        Object.keys(classes).forEach(classId => {
-            const option = document.createElement('option');
-            option.value = classes[classId].name;
-            option.textContent = `${classId} - ${classes[classId].name}`;
-            studentClassSelect.appendChild(option);
-        });
+        // أحداث الإغلاق
+        document.getElementById('classModalClose').addEventListener('click', () => classModal.style.display = 'none');
+        document.getElementById('addStudentModalClose').addEventListener('click', () => addStudentModal.style.display = 'none');
+        document.getElementById('addAbsenceModalClose').addEventListener('click', () => addAbsenceModal.style.display = 'none');
+        document.getElementById('deleteModalClose').addEventListener('click', () => deleteModal.style.display = 'none');
+        document.getElementById('clearAllModalClose').addEventListener('click', () => clearAllModal.style.display = 'none');
 
         // أحداث النماذج
         addStudentForm.addEventListener('submit', handleAddStudent);
+        addAbsenceForm.addEventListener('submit', handleAddAbsence);
         refreshBtn.addEventListener('click', fetchAllData);
         clearAllBtn.addEventListener('click', () => clearAllModal.style.display = 'flex');
-        searchStudentInput.addEventListener('input', handleSearch);
+        globalSearch.addEventListener('input', handleGlobalSearch);
+        classSearch.addEventListener('input', handleClassSearch);
+        addStudentBtn.addEventListener('click', openAddStudentModal);
+        addAbsenceBtn.addEventListener('click', openAddAbsenceModal);
+        clearClassAttendanceBtn.addEventListener('click', clearClassAttendance);
         confirmDeleteBtn.addEventListener('click', confirmDelete);
-        cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-        deleteModalClose.addEventListener('click', closeDeleteModal);
+        cancelDeleteBtn.addEventListener('click', () => deleteModal.style.display = 'none');
         confirmClearAllBtn.addEventListener('click', confirmClearAll);
         cancelClearAllBtn.addEventListener('click', () => clearAllModal.style.display = 'none');
-        clearAllModalClose.addEventListener('click', () => clearAllModal.style.display = 'none');
 
         // إغلاق النوافذ عند النقر خارجها
         window.addEventListener('click', function(event) {
-            if (event.target === deleteModal) closeDeleteModal();
+            if (event.target === classModal) classModal.style.display = 'none';
+            if (event.target === addStudentModal) addStudentModal.style.display = 'none';
+            if (event.target === addAbsenceModal) addAbsenceModal.style.display = 'none';
+            if (event.target === deleteModal) deleteModal.style.display = 'none';
             if (event.target === clearAllModal) clearAllModal.style.display = 'none';
         });
 
         // جلب البيانات عند تحميل الصفحة
         fetchAllData();
 
-        async function handleAddStudent(e) {
-            e.preventDefault();
-            const firstName = document.getElementById('newFirstName').value.trim();
-            const lastName = document.getElementById('newLastName').value.trim();
-            const studentClass = document.getElementById('studentClass').value;
+        function handleGlobalSearch() {
+            const searchTerm = globalSearch.value.trim().toLowerCase();
+            searchResults.style.display = searchTerm ? 'block' : 'none';
+            
+            if (!searchTerm) return;
 
-            if (firstName && lastName && studentClass) {
-                try {
-                    const newStudent = {
-                        first: firstName,
-                        second: lastName,
-                        class: studentClass,
-                        timestamp: new Date().getTime(),
-                        type: 'student' // تمييز أن هذا طالب وليس تسجيل حضور
-                    };
-
-                    // جلب البيانات الحالية أولاً
-                    await fetchAllData();
-                    
-                    // إضافة الطالب الجديد
-                    allStudentsData.push(newStudent);
-                    
-                    // حفظ في JSONBin
-                    await saveToJSONBin(allStudentsData);
-                    
-                    // تحديث العرض
-                    updateAllDisplays();
-                    
-                    // مسح الحقول
-                    addStudentForm.reset();
-                    
-                    showMessage('تم إضافة الطالب بنجاح', 'success');
-                } catch (error) {
-                    console.error('Error adding student:', error);
-                    showMessage('حدث خطأ في إضافة الطالب', 'error');
+            const results = [];
+            
+            // البحث في الفصول
+            Object.keys(classes).forEach(classId => {
+                const classInfo = classes[classId];
+                if (classInfo.name.toLowerCase().includes(searchTerm) || 
+                    classInfo.teacher.toLowerCase().includes(searchTerm)) {
+                    results.push({
+                        type: 'class',
+                        id: classId,
+                        name: classInfo.name,
+                        teacher: classInfo.teacher
+                    });
                 }
-            } else {
-                showMessage('يرجى ملء جميع الحقول', 'error');
-            }
+            });
+            
+            // البحث في جميع البيانات (الطلاب المسجلين وتسجيلات الحضور)
+            allStudentsData.forEach((student, index) => {
+                const fullName = `${student.first || ''} ${student.second || ''}`.toLowerCase();
+                const className = student.class || '';
+                
+                if (fullName.includes(searchTerm) || className.toLowerCase().includes(searchTerm)) {
+                    results.push({
+                        type: student.recordType || 'attendance',
+                        id: index,
+                        name: `${student.first} ${student.second}`,
+                        class: student.class,
+                        studentData: student
+                    });
+                }
+            });
+
+            displaySearchResults(results);
         }
 
-        function handleSearch() {
-            const searchTerm = searchStudentInput.value.trim().toLowerCase();
-            if (searchTerm === '') {
-                updateStudentsDisplay(allStudentsData);
+        function displaySearchResults(results) {
+            searchResults.innerHTML = '';
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="empty-state">لا توجد نتائج</div>';
                 return;
             }
 
-            const filteredStudents = allStudentsData.filter(student =>
-                student.first.toLowerCase().includes(searchTerm) ||
-                student.second.toLowerCase().includes(searchTerm) ||
-                student.class.toLowerCase().includes(searchTerm)
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                
+                if (result.type === 'class') {
+                    item.innerHTML = `
+                        <div>
+                            <strong>${result.name}</strong>
+                            <div style="color: #777; font-size: 14px;">${result.teacher}</div>
+                        </div>
+                        <span class="result-type type-class">فصل</span>
+                    `;
+                    item.addEventListener('click', () => openClassModal(result.id));
+                } else {
+                    item.innerHTML = `
+                        <div>
+                            <strong>${result.name}</strong>
+                            <div style="color: #777; font-size: 14px;">${result.class}</div>
+                        </div>
+                        <span class="result-type type-student">${result.type === 'student' ? 'طالب مسجل' : 'تسجيل حضور'}</span>
+                    `;
+                    item.addEventListener('click', () => {
+                        // البحث عن الفصل الخاص بالطالب وفتحه مع التمييز
+                        const classId = findClassIdByName(result.class);
+                        if (classId) {
+                            studentToHighlight = result.name;
+                            openClassModal(classId);
+                        }
+                    });
+                }
+                
+                searchResults.appendChild(item);
+            });
+        }
+
+        function findClassIdByName(className) {
+            return Object.keys(classes).find(id => classes[id].name === className);
+        }
+
+        function openClassModal(classId) {
+            currentClassModal = classId;
+            const classInfo = classes[classId];
+            
+            document.getElementById('classModalTitle').textContent = `إدارة ${classInfo.name}`;
+            document.getElementById('selectedClass').value = classInfo.name;
+            document.getElementById('absenceSelectedClass').value = classInfo.name;
+            
+            updateClassStudentsDisplay();
+            classModal.style.display = 'flex';
+            classSearch.value = '';
+        }
+
+        function openAddStudentModal() {
+            addStudentModal.style.display = 'flex';
+            document.getElementById('newFirstName').value = '';
+            document.getElementById('newLastName').value = '';
+        }
+
+        function openAddAbsenceModal() {
+            addAbsenceModal.style.display = 'flex';
+            document.getElementById('absenceFirstName').value = '';
+            document.getElementById('absenceLastName').value = '';
+        }
+
+        function handleClassSearch() {
+            updateClassStudentsDisplay();
+        }
+
+        function updateClassStudentsDisplay() {
+            const classStudentsList = document.getElementById('classStudentsList');
+            const searchTerm = classSearch.value.trim().toLowerCase();
+            const classInfo = classes[currentClassModal];
+            
+            if (!classInfo) {
+                classStudentsList.innerHTML = '<div class="empty-state">لم يتم تحديد فصل</div>';
+                return;
+            }
+            
+            // الحصول على جميع الطلاب المسجلين في هذا الفصل
+            const registeredStudents = allStudentsData.filter(student => 
+                student.class === classInfo.name && student.recordType === 'student'
+            );
+            
+            // الحصول على جميع تسجيلات الحضور في هذا الفصل
+            const attendanceRecords = allStudentsData.filter(record => 
+                record.class === classInfo.name && record.recordType !== 'student'
             );
 
-            updateStudentsDisplay(filteredStudents);
+            console.log('الطلاب المسجلين:', registeredStudents);
+            console.log('تسجيلات الحضور:', attendanceRecords);
+            
+            // تطبيق البحث إذا كان هناك نص بحث
+            const filteredStudents = searchTerm ? 
+                registeredStudents.filter(student => 
+                    (student.first && student.first.toLowerCase().includes(searchTerm)) ||
+                    (student.second && student.second.toLowerCase().includes(searchTerm))
+                ) : registeredStudents;
+
+            classStudentsList.innerHTML = '';
+
+            if (filteredStudents.length === 0 && attendanceRecords.length === 0) {
+                classStudentsList.innerHTML = '<div class="empty-state">لا يوجد طلاب أو تسجيلات حضور في هذا الفصل</div>';
+                return;
+            }
+
+            // عرض الطلاب المسجلين
+            if (filteredStudents.length > 0) {
+                const studentsTitle = document.createElement('div');
+                studentsTitle.style.cssText = 'font-weight: bold; color: var(--primary-color); margin: 15px 0 10px 0; padding-bottom: 5px; border-bottom: 2px solid var(--primary-color);';
+                studentsTitle.textContent = `الطلاب المسجلين (${filteredStudents.length})`;
+                classStudentsList.appendChild(studentsTitle);
+
+                filteredStudents.forEach((student) => {
+                    const studentItem = createStudentItem(student, 'student');
+                    classStudentsList.appendChild(studentItem);
+                });
+            }
+
+            // عرض تسجيلات الحضور
+            if (attendanceRecords.length > 0) {
+                const attendanceTitle = document.createElement('div');
+                attendanceTitle.style.cssText = 'font-weight: bold; color: var(--secondary-color); margin: 20px 0 10px 0; padding-bottom: 5px; border-bottom: 2px solid var(--secondary-color);';
+                attendanceTitle.textContent = `تسجيلات الحضور والغياب (${attendanceRecords.length})`;
+                classStudentsList.appendChild(attendanceTitle);
+
+                // نعرض فقط آخر 20 تسجيل حضور للفصل
+                const recentAttendance = attendanceRecords
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .slice(0, 20);
+
+                recentAttendance.forEach((record) => {
+                    const attendanceItem = createStudentItem(record, 'attendance');
+                    classStudentsList.appendChild(attendanceItem);
+                });
+
+                if (attendanceRecords.length > 20) {
+                    const moreText = document.createElement('div');
+                    moreText.style.cssText = 'text-align: center; color: #777; font-style: italic; margin: 10px 0;';
+                    moreText.textContent = `... وعرض ${attendanceRecords.length - 20} تسجيل إضافي`;
+                    classStudentsList.appendChild(moreText);
+                }
+            }
+        }
+
+        function createStudentItem(data, type) {
+            const item = document.createElement('div');
+            item.className = 'student-item';
+            
+            if (type === 'attendance') {
+                item.style.backgroundColor = '#f0f8f0';
+                item.style.borderLeftColor = 'var(--secondary-color)';
+            }
+            
+            const fullName = `${data.first} ${data.second}`;
+            if (studentToHighlight === fullName) {
+                item.classList.add('highlight');
+                setTimeout(() => {
+                    item.classList.remove('highlight');
+                    studentToHighlight = null;
+                }, 2000);
+            }
+            
+            const attendanceBadge = type === 'attendance' ? 
+                `<span style="background: ${data.attendance === 'غياب' ? 'var(--danger-color)' : 'var(--secondary-color)'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 8px;">
+                    ${data.attendance === 'غياب' ? 'غياب' : 'حضور'}
+                </span>` : '';
+            
+            const timeInfo = type === 'attendance' && data.time ? 
+                `<div style="color: #777; font-size: 12px; margin-top: 5px;">${data.time}</div>` : '';
+
+            item.innerHTML = `
+                <div class="student-info">
+                    <span class="student-name">${data.first} ${data.second}</span>
+                    ${attendanceBadge}
+                </div>
+                <div class="student-actions">
+                    ${type === 'student' ? `
+                        <button class="btn btn-danger btn-small delete-student-btn" 
+                                data-id="${data.first}-${data.second}-${data.class}">
+                            حذف
+                        </button>
+                    ` : ''}
+                </div>
+                ${timeInfo}
+            `;
+
+            if (type === 'student') {
+                item.querySelector('.delete-student-btn').addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    const [firstName, lastName, studentClass] = studentId.split('-');
+                    
+                    const studentIndex = allStudentsData.findIndex(student => 
+                        student.first === firstName && 
+                        student.second === lastName && 
+                        student.class === studentClass &&
+                        student.recordType === 'student'
+                    );
+                    
+                    if (studentIndex !== -1) {
+                        openDeleteModal(allStudentsData[studentIndex], studentIndex);
+                    }
+                });
+            }
+
+            return item;
         }
 
         function openDeleteModal(student, index) {
@@ -808,25 +1139,109 @@
             deleteModal.style.display = 'flex';
         }
 
-        function closeDeleteModal() {
-            deleteModal.style.display = 'none';
-            studentToDelete = null;
+        async function handleAddStudent(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('newFirstName').value.trim();
+            const lastName = document.getElementById('newLastName').value.trim();
+            const studentClass = document.getElementById('selectedClass').value;
+
+            if (firstName && lastName && studentClass) {
+                try {
+                    const newStudent = {
+                        first: firstName,
+                        second: lastName,
+                        class: studentClass,
+                        timestamp: new Date().getTime(),
+                        recordType: 'student'
+                    };
+
+                    allStudentsData.push(newStudent);
+                    await saveToJSONBin(allStudentsData);
+                    
+                    updateClassStudentsDisplay();
+                    updateClassesDisplay();
+                    
+                    addStudentModal.style.display = 'none';
+                    showMessage('تم إضافة الطالب بنجاح', 'success');
+                } catch (error) {
+                    console.error('Error adding student:', error);
+                    showMessage('حدث خطأ في إضافة الطالب', 'error');
+                }
+            }
+        }
+
+        async function handleAddAbsence(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('absenceFirstName').value.trim();
+            const lastName = document.getElementById('absenceLastName').value.trim();
+            const studentClass = document.getElementById('absenceSelectedClass').value;
+
+            if (firstName && lastName && studentClass) {
+                try {
+                    const now = new Date();
+                    const newAbsence = {
+                        first: firstName,
+                        second: lastName,
+                        class: studentClass,
+                        attendance: 'غياب',
+                        time: now.toLocaleString(),
+                        timestamp: now.getTime(),
+                        recordType: 'attendance'
+                    };
+
+                    allStudentsData.push(newAbsence);
+                    await saveToJSONBin(allStudentsData);
+                    
+                    updateClassStudentsDisplay();
+                    
+                    addAbsenceModal.style.display = 'none';
+                    showMessage('تم تسجيل الغياب بنجاح', 'success');
+                } catch (error) {
+                    console.error('Error adding absence:', error);
+                    showMessage('حدث خطأ في تسجيل الغياب', 'error');
+                }
+            }
+        }
+
+        async function clearClassAttendance() {
+            if (!currentClassModal) return;
+            
+            const classInfo = classes[currentClassModal];
+            
+            // حذف فقط تسجيلات الحضور (وليس الطلاب المسجلين)
+            const originalLength = allStudentsData.length;
+            allStudentsData = allStudentsData.filter(record => 
+                !(record.class === classInfo.name && record.recordType !== 'student')
+            );
+            
+            const deletedCount = originalLength - allStudentsData.length;
+            
+            if (deletedCount === 0) {
+                showMessage('لا توجد تسجيلات حضور في هذا الفصل', 'error');
+                return;
+            }
+
+            try {
+                await saveToJSONBin(allStudentsData);
+                updateClassStudentsDisplay();
+                showMessage(`تم حذف ${deletedCount} تسجيلات حضور من الفصل`, 'success');
+            } catch (error) {
+                console.error('Error clearing class attendance:', error);
+                showMessage('حدث خطأ في حذف تسجيلات الحضور', 'error');
+            }
         }
 
         async function confirmDelete() {
             if (studentToDelete) {
                 try {
-                    // إزالة الطالب من البيانات
                     allStudentsData.splice(studentToDelete.index, 1);
-                    
-                    // حفظ في JSONBin
                     await saveToJSONBin(allStudentsData);
                     
-                    // تحديث العرض
-                    updateAllDisplays();
+                    updateClassStudentsDisplay();
+                    updateClassesDisplay();
                     
                     showMessage('تم حذف الطالب بنجاح', 'success');
-                    closeDeleteModal();
+                    deleteModal.style.display = 'none';
                 } catch (error) {
                     console.error('Error deleting student:', error);
                     showMessage('حدث خطأ في حذف الطالب', 'error');
@@ -836,15 +1251,10 @@
 
         async function confirmClearAll() {
             try {
-                // حذف جميع البيانات
                 allStudentsData = [];
-                
-                // حفظ في JSONBin
                 await saveToJSONBin(allStudentsData);
                 
-                // تحديث العرض
                 updateAllDisplays();
-                
                 showMessage('تم حذف جميع البيانات بنجاح', 'success');
                 clearAllModal.style.display = 'none';
             } catch (error) {
@@ -870,6 +1280,14 @@
                 const result = await response.json();
                 allStudentsData = result.record || [];
                 
+                // تأكد من أن جميع الطلاب المسجلين لديهم recordType = 'student'
+                allStudentsData.forEach(item => {
+                    if (!item.recordType) {
+                        // إذا كان العنصر لا يحتوي على recordType، افترض أنه تسجيل حضور قديم
+                        item.recordType = 'attendance';
+                    }
+                });
+                
                 updateAllDisplays();
                 
             } catch (error) {
@@ -879,28 +1297,11 @@
         }
 
         function updateAllDisplays() {
-            updateStats();
             updateClassesDisplay();
-            updateStudentsDisplay(allStudentsData);
-        }
-
-        function updateStats() {
-            // عدد الفصول
-            document.getElementById('totalClasses').textContent = Object.keys(classes).length;
-            
-            // إجمالي الطلاب (الطلاب المسجلين فقط)
-            const uniqueStudents = allStudentsData.filter(student => student.type === 'student');
-            document.getElementById('totalStudents').textContent = uniqueStudents.length;
-            
-            // سجل الحضور (جميع التسجيلات)
-            document.getElementById('totalAttendance').textContent = allStudentsData.length;
-            
-            // تسجيلات اليوم
-            const today = new Date().toDateString();
-            const todayRecords = allStudentsData.filter(record => 
-                new Date(record.timestamp).toDateString() === today
-            );
-            document.getElementById('todayRecords').textContent = todayRecords.length;
+            // تحديث عرض الفصل المفتوح إذا كان مفتوحاً
+            if (currentClassModal) {
+                updateClassStudentsDisplay();
+            }
         }
 
         function updateClassesDisplay() {
@@ -908,11 +1309,11 @@
 
             Object.keys(classes).forEach(classId => {
                 const classInfo = classes[classId];
-                const classStudents = allStudentsData.filter(student => 
-                    student.class === classInfo.name && student.type === 'student'
+                const registeredStudents = allStudentsData.filter(student => 
+                    student.class === classInfo.name && student.recordType === 'student'
                 );
-                const classAttendance = allStudentsData.filter(record => 
-                    record.class === classInfo.name
+                const attendanceRecords = allStudentsData.filter(record => 
+                    record.class === classInfo.name && record.recordType === 'attendance'
                 );
 
                 const classCard = document.createElement('div');
@@ -921,58 +1322,12 @@
                     <div class="class-name">${classInfo.name}</div>
                     <div class="class-teacher">${classInfo.teacher}</div>
                     <div class="class-stats">
-                        <span>الطلاب: ${classStudents.length}</span>
-                        <span>التسجيلات: ${classAttendance.length}</span>
-                    </div>
-                    <div class="class-actions">
-                        <a href="teachers.html?class=${classId}" class="btn btn-primary btn-small" target="_blank">
-                            إدارة الفصل
-                        </a>
-                        <a href="attendance.html?class=${classId}" class="btn btn-success btn-small" target="_blank">
-                            صفحة الحضور
-                        </a>
+                        <span>الطلاب: ${registeredStudents.length}</span>
+                        <span>التسجيلات: ${attendanceRecords.length}</span>
                     </div>
                 `;
+                classCard.addEventListener('click', () => openClassModal(classId));
                 classesGrid.appendChild(classCard);
-            });
-        }
-
-        function updateStudentsDisplay(studentsToShow = allStudentsData) {
-            studentsRecords.innerHTML = '';
-
-            if (studentsToShow.length === 0) {
-                emptyState.style.display = 'block';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-
-            // عرض الطلاب
-            studentsToShow.forEach((student, index) => {
-                const listItem = document.createElement('li');
-                const isAttendanceRecord = !student.type || student.type === 'attendance';
-                
-                listItem.innerHTML = `
-                    <div class="student-info">
-                        <span class="student-name">${student.first} ${student.second}</span>
-                        <span class="student-class">${student.class}</span>
-                        ${isAttendanceRecord ? '<span style="color: #e74c3c; font-size: 12px;">(تسجيل حضور)</span>' : ''}
-                    </div>
-                    <div class="student-actions">
-                        <button class="btn btn-danger btn-small delete-btn" data-index="${index}">
-                            حذف
-                        </button>
-                    </div>
-                `;
-                studentsRecords.appendChild(listItem);
-            });
-
-            // إضافة أحداث الحذف
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    openDeleteModal(studentsToShow[index], index);
-                });
             });
         }
 
