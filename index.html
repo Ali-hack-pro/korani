@@ -624,13 +624,14 @@
         }
         
         // بدء التحديث التلقائي
-        function startAutoRefresh() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-            refreshInterval = setInterval(fetchAttendance, 500000);
-            console.log('Auto-refresh started: updating every 10 seconds');
-        }
+// بدء التحديث التلقائي كل دقيقتين (120,000 ميلي ثانية)
+function startAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+    refreshInterval = setInterval(fetchAttendance, 120000); // 120,000 ميلي ثانية = 2 دقيقة
+    console.log('Auto-refresh started: updating every 2 minutes');
+}
         
         // فتح نافذة تسجيل الغياب
         absenceBtn.addEventListener('click', function() {
