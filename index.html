@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- نفس الستايل السابق - لا تغيير -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام تسجيل الحضور والغياب</title>
     <style>
-        /* نفس الستايل السابق - لا تغيير */
         :root {
             --primary-color: #3498db;
             --secondary-color: #2ecc71;
@@ -486,10 +484,10 @@
     </div>
 
 <script>
-    // إعدادات JSONBin.io - ضع معلوماتك هنا
+    // إعدادات JSONBin.io - استخدم معلوماتك هنا
     const JSONBIN_CONFIG = {
-        BIN_ID: '68ebd1e4d0ea881f409f33c0', // استبدل هذا بمعرف الـ Bin الخاص بك
-        API_KEY: '$2a$10$j2RFt5cgHHSkHvUzwqZV.eoHlA3A.8C.rt4IWH/XDTwyN7Pt1Fm9S', // استبدل هذا بمفتاح API الخاص بك
+        BIN_ID: '68ebd1e4d0ea881f409f33c0',
+        API_KEY: '$2a$10$j2RFt5cgHHSkHvUzwqZV.eoHlA3A.8C.rt4IWH/XDTwyN7Pt1Fm9S',
         BASE_URL: 'https://api.jsonbin.io/v3/b'
     };
     
@@ -558,7 +556,11 @@
                 modalTitle: "تسجيل غياب طالب",
                 className: `الفصل: ${currentClass}`,
                 present: "حضور",
-                absent: "غياب"
+                absent: "غياب",
+                loading: "جاري التحميل...",
+                saving: "جاري الحفظ...",
+                errorLoading: "خطأ في تحميل البيانات",
+                errorSaving: "خطأ في حفظ البيانات"
             },
             de: {
                 firstNameLabel: "Vorname", 
@@ -574,7 +576,11 @@
                 modalTitle: "Abwesenheit eines Schülers registrieren",
                 className: `Klasse: ${currentClass}`,
                 present: "Anwesend",
-                absent: "Abwesend"
+                absent: "Abwesend",
+                loading: "Lädt...",
+                saving: "Wird gespeichert...",
+                errorLoading: "Fehler beim Laden der Daten",
+                errorSaving: "Fehler beim Speichern der Daten"
             }
         };
         
@@ -596,6 +602,7 @@
         languageSwitcher.addEventListener('click', function() {
             currentLang = currentLang === 'ar' ? 'de' : 'ar';
             updateLanguage(currentLang);
+            updateAttendanceDisplay(); // تحديث العرض باللغة الجديدة
         });
         
         function updateLanguage(lang) {
@@ -669,9 +676,7 @@
                 const now = new Date();
                 const timeString = now.toLocaleString();
                 
-                showMessage(currentLang === 'ar' ? 
-                    (attendanceType === 'حضور' ? 'جاري تسجيل الحضور...' : 'جاري تسجيل الغياب...') :
-                    (attendanceType === 'حضور' ? 'Anwesenheit wird registriert...' : 'Abwesenheit wird registriert...'), 'loading');
+                showMessage(texts[currentLang].saving, 'loading');
                 
                 try {
                     // إنشاء السجل الجديد
@@ -683,6 +688,9 @@
                         attendance: attendanceType,
                         timestamp: now.getTime()
                     };
+                    
+                    // جلب البيانات الحالية أولاً
+                    await fetchAttendance();
                     
                     // إضافة السجل إلى البيانات المحلية
                     allAttendanceData.push(newRecord);
@@ -740,6 +748,8 @@
         // وظيفة لجلب البيانات من JSONBin
         async function fetchAttendance() {
             try {
+                showMessage(texts[currentLang].loading, 'loading');
+                
                 const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
                     headers: {
                         'X-Master-Key': JSONBIN_CONFIG.API_KEY
@@ -763,13 +773,10 @@
         
         function processAttendanceData(data) {
             console.log('Processing data for class:', currentClass);
-            console.log('All data:', data);
             
             // تصفية البيانات للفصل الحالي فقط
             const classData = data.filter(item => {
-                const matches = item.class === currentClass;
-                console.log(`Item class: "${item.class}", Current class: "${currentClass}", Matches: ${matches}`);
-                return matches;
+                return item.class === currentClass;
             });
             
             console.log('Filtered data for class:', classData);
@@ -780,25 +787,7 @@
                     emptyState.style.display = 'none';
                 }
                 
-                // مسح القائمة الحالية
-                attendanceRecords.innerHTML = '';
-                
-                // إضافة البيانات إلى القائمة
-                classData.forEach(student => {
-                    const listItem = document.createElement('li');
-                    const attendanceType = student.attendance === 'غياب' ? 'غياب' : 'حضور';
-                    listItem.className = attendanceType === 'حضور' ? 'attendance-item' : 'absence-item';
-                    listItem.innerHTML = `
-                        <div>
-                            <span class="student-name">${student.first} ${student.second}</span>
-                            <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
-                                ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
-                            </span>
-                        </div>
-                        <span class="timestamp">${student.time}</span>
-                    `;
-                    attendanceRecords.appendChild(listItem);
-                });
+                updateAttendanceDisplay(classData);
             } else {
                 // عرض رسالة عدم وجود بيانات
                 emptyState.style.display = 'block';
@@ -807,18 +796,43 @@
         }
         
         // وظيفة لتحديث العرض المحلي
-        function updateAttendanceDisplay() {
-            processAttendanceData(allAttendanceData);
+        function updateAttendanceDisplay(classData = null) {
+            const dataToDisplay = classData || allAttendanceData.filter(item => item.class === currentClass);
+            
+            // مسح القائمة الحالية
+            attendanceRecords.innerHTML = '';
+            
+            if (dataToDisplay.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            // إضافة البيانات إلى القائمة
+            dataToDisplay.forEach(student => {
+                const listItem = document.createElement('li');
+                const attendanceType = student.attendance === 'غياب' ? 'غياب' : 'حضور';
+                listItem.className = attendanceType === 'حضور' ? 'attendance-item' : 'absence-item';
+                listItem.innerHTML = `
+                    <div>
+                        <span class="student-name">${student.first} ${student.second}</span>
+                        <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
+                            ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
+                        </span>
+                    </div>
+                    <span class="timestamp">${student.time}</span>
+                `;
+                attendanceRecords.appendChild(listItem);
+            });
         }
         
         function showLoadError() {
             if (attendanceRecords.children.length === 0 || 
                 (attendanceRecords.children.length === 1 && 
                  attendanceRecords.children[0].classList.contains('empty-state'))) {
-                emptyState.textContent = currentLang === 'ar' ? 
-                    'خطأ في تحميل البيانات' : 'Fehler beim Laden der Daten';
+                emptyState.textContent = texts[currentLang].errorLoading;
                 emptyState.style.display = 'block';
             }
+            showMessage(texts[currentLang].errorLoading, 'error');
         }
         
         // وظيفة لعرض الرسائل
