@@ -248,6 +248,10 @@
             background-color: var(--secondary-color);
         }
         
+        .type-absence {
+            background-color: var(--danger-color);
+        }
+        
         .classes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -542,6 +546,19 @@
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, #2980b9, #1f6392);
         }
+
+        /* تخصيص حقول إدخال الغياب */
+        .absence-input {
+            background-color: #ffe6e6;
+            border: 2px solid #ff9999;
+        }
+
+        .absence-input:focus {
+            background-color: #ffcccc;
+            border-color: #ff6666;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 102, 102, 0.2);
+        }
         
         @media (max-width: 768px) {
             header {
@@ -603,17 +620,6 @@
             flex: 1;
             min-width: 120px;
         }
-        .absence-input {
-    background-color: #ffe6e6;
-    border: 2px solid #ff9999;
-}
-
-.absence-input:focus {
-    background-color: #ffcccc;
-    border-color: #ff6666;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 102, 102, 0.2);
-}
     </style>
 </head>
 <body>
@@ -703,32 +709,33 @@
             </form>
         </div>
     </div>
-<!-- نافذة إضافة غياب -->
-<div class="modal" id="addAbsenceModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">إضافة غياب طالب</h3>
-            <button class="modal-close" id="addAbsenceModalClose">&times;</button>
+
+    <!-- نافذة إضافة غياب -->
+    <div class="modal" id="addAbsenceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة غياب طالب</h3>
+                <button class="modal-close" id="addAbsenceModalClose">&times;</button>
+            </div>
+            <form id="addAbsenceForm">
+                <div class="form-group">
+                    <label for="absenceFirstName">الاسم الأول</label>
+                    <input type="text" id="absenceFirstName" class="absence-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="absenceLastName">الاسم الثاني</label>
+                    <input type="text" id="absenceLastName" class="absence-input" required>
+                </div>
+                
+                <input type="hidden" id="absenceSelectedClass">
+                
+                <button type="submit" class="btn btn-warning" style="width: 100%;">
+                    تسجيل الغياب
+                </button>
+            </form>
         </div>
-        <form id="addAbsenceForm">
-            <div class="form-group">
-                <label for="absenceFirstName">الاسم الأول</label>
-                <input type="text" id="absenceFirstName" class="absence-input" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="absenceLastName">الاسم الثاني</label>
-                <input type="text" id="absenceLastName" class="absence-input" required>
-            </div>
-            
-            <input type="hidden" id="absenceSelectedClass">
-            
-            <button type="submit" class="btn btn-warning" style="width: 100%;">
-                تسجيل الغياب
-            </button>
-        </form>
     </div>
-</div>
 
     <!-- نافذة تأكيد الحذف -->
     <div class="modal" id="deleteModal">
@@ -904,11 +911,18 @@
                 const className = student.class || '';
                 
                 if (fullName.includes(searchTerm) || className.toLowerCase().includes(searchTerm)) {
+                    // تحديد نوع السجل للعرض في البحث
+                    let displayType = student.recordType || 'attendance';
+                    if (displayType === 'attendance' && student.attendance === 'غياب') {
+                        displayType = 'absence';
+                    }
+                    
                     results.push({
-                        type: student.recordType || 'attendance',
+                        type: displayType,
                         id: index,
                         name: `${student.first} ${student.second}`,
                         class: student.class,
+                        attendance: student.attendance,
                         studentData: student
                     });
                 }
@@ -939,12 +953,23 @@
                     `;
                     item.addEventListener('click', () => openClassModal(result.id));
                 } else {
+                    let typeText = 'طالب مسجل';
+                    let typeClass = 'type-student';
+                    
+                    if (result.type === 'absence') {
+                        typeText = 'غياب';
+                        typeClass = 'type-absence';
+                    } else if (result.type === 'attendance') {
+                        typeText = 'حضور';
+                        typeClass = 'type-student';
+                    }
+                    
                     item.innerHTML = `
                         <div>
                             <strong>${result.name}</strong>
                             <div style="color: #777; font-size: 14px;">${result.class}</div>
                         </div>
-                        <span class="result-type type-student">${result.type === 'student' ? 'طالب مسجل' : 'تسجيل حضور'}</span>
+                        <span class="result-type ${typeClass}">${typeText}</span>
                     `;
                     item.addEventListener('click', () => {
                         // البحث عن الفصل الخاص بالطالب وفتحه مع التمييز
@@ -1076,6 +1101,12 @@
             if (type === 'attendance') {
                 item.style.backgroundColor = '#f0f8f0';
                 item.style.borderLeftColor = 'var(--secondary-color)';
+                
+                // إذا كان غياب، نغير اللون إلى الأحمر
+                if (data.attendance === 'غياب') {
+                    item.style.backgroundColor = '#ffe6e6';
+                    item.style.borderLeftColor = 'var(--danger-color)';
+                }
             }
             
             const fullName = `${data.first} ${data.second}`;
