@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تسجيل الحضور</title>
+    <title>نظام تسجيل الحضور والغياب</title>
     <style>
         :root {
             --primary-color: #3498db;
             --secondary-color: #2ecc71;
-            --accent-color: #e74c3c;
+            --absence-color: #e74c3c;
             --text-color: #333;
             --light-bg: #f9f9f9;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -22,7 +22,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* تخصيص شريط التمرير */
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -48,10 +47,8 @@
             animation: gradient 5s ease infinite;
             color: var(--text-color);
             line-height: 1.6;
-            transition: all 0.5s ease;
             min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
         }
         
         @keyframes gradient {
@@ -74,7 +71,6 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: var(--shadow);
-            transition: all 0.5s ease;
         }
         
         .logo-container {
@@ -85,7 +81,6 @@
         .logo {
             height: 60px;
             margin-left: 15px;
-            transition: all 0.5s ease;
         }
         
         .class-name {
@@ -119,7 +114,6 @@
         .language-switcher:hover {
             background-color: #2980b9;
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
         
         .main-content {
@@ -127,14 +121,6 @@
             border-radius: 10px;
             padding: 30px;
             box-shadow: var(--shadow);
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        
-        .fade-out {
-            opacity: 0;
-            transform: translateY(20px);
         }
         
         .form-group {
@@ -172,7 +158,6 @@
         
         .btn {
             display: inline-block;
-            background-color: var(--primary-color);
             color: white;
             border: none;
             padding: 15px 25px;
@@ -187,25 +172,24 @@
         }
         
         .btn:hover {
-            background-color: #2980b9;
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
         
-        .btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-        }
-        
-        .btn-secondary:hover {
+        .btn-attendance {
             background-color: var(--primary-color);
-            color: white;
+        }
+        
+        .btn-attendance:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-absence {
+            background-color: var(--absence-color);
+        }
+        
+        .btn-absence:hover {
+            background-color: #c0392b;
         }
         
         .attendance-list {
@@ -214,7 +198,6 @@
             padding-top: 20px;
             max-height: 400px;
             overflow-y: auto;
-            scroll-behavior: smooth;
         }
         
         .attendance-list h2 {
@@ -224,7 +207,6 @@
             top: 0;
             background: white;
             padding: 10px 0;
-            z-index: 1;
         }
         
         #attendanceRecords {
@@ -239,7 +221,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s, background-color 0.2s;
+            transition: transform 0.2s;
             animation: fadeIn 0.5s ease;
         }
         
@@ -250,7 +232,14 @@
         
         #attendanceRecords li:hover {
             transform: translateX(5px);
-            background-color: #e8f4fc;
+        }
+        
+        .attendance-item {
+            background-color: #e8f4fc !important;
+        }
+        
+        .absence-item {
+            background-color: #fde8e8 !important;
         }
         
         .timestamp {
@@ -297,7 +286,7 @@
         }
         
         .error {
-            background-color: var(--accent-color);
+            background-color: var(--absence-color);
         }
         
         .loading {
@@ -333,7 +322,6 @@
             z-index: 2000;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.3s ease;
         }
         
         .modal-content {
@@ -344,8 +332,6 @@
             width: 90%;
             max-width: 500px;
             animation: slideUp 0.3s ease;
-            max-height: 90vh;
-            overflow-y: auto;
         }
         
         @keyframes slideUp {
@@ -392,14 +378,6 @@
                 margin-top: 10px;
             }
             
-            .buttons-container {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-            
             .message {
                 right: 10px;
                 left: 10px;
@@ -407,7 +385,6 @@
             }
         }
         
-        /* اللغة الألمانية */
         body[dir="ltr"] {
             text-align: left;
         }
@@ -429,20 +406,11 @@
             right: auto;
             left: 20px;
         }
-        
-        @keyframes slideInLTR {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        body[dir="ltr"] .message {
-            animation: slideInLTR 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <header id="pageHeader">
+        <header>
             <div class="logo-container">
                 <img src="https://korani.eu/img/logoar.png" alt="شعار الموقع" class="logo">
                 <div class="class-name" id="className">الفصل: غير محدد</div>
@@ -452,7 +420,7 @@
             </div>
         </header>
         
-        <div class="main-content" id="mainContent">
+        <div class="main-content">
             <form id="attendanceForm">
                 <div class="form-group">
                     <label for="firstName" id="firstNameLabel">الاسم الأول</label>
@@ -465,162 +433,117 @@
                 </div>
                 
                 <div class="buttons-container">
-                    <button type="submit" class="btn" id="submitBtn">تسجيل الحضور</button>
-                    <button type="button" class="btn btn-secondary" id="addStudentBtn">طالب آخر +</button>
+                    <button type="submit" class="btn btn-attendance" id="submitBtn">تسجيل الحضور</button>
+                    <button type="button" class="btn btn-absence" id="absenceBtn">تسجيل غياب</button>
                 </div>
             </form>
             
             <div class="attendance-list">
-                <h2 id="attendanceListTitle">سجل الحضور</h2>
+                <h2 id="attendanceListTitle">سجل الحضور والغياب</h2>
                 <ul id="attendanceRecords">
-                    <li class="empty-state" id="emptyState">لم يتم تسجيل أي حضور بعد</li>
+                    <li class="empty-state" id="emptyState">لم يتم تسجيل أي حضور أو غياب بعد</li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <!-- نافذة إضافة طالب جديد -->
-    <div class="modal" id="studentModal">
+    <!-- نافذة تسجيل الغياب -->
+    <div class="modal" id="absenceModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">تسجيل حضور طالب آخر</h3>
+                <h3 class="modal-title" id="modalTitle">تسجيل غياب طالب</h3>
                 <button class="modal-close" id="modalClose">&times;</button>
             </div>
-            <form id="modalForm">
+            <form id="absenceForm">
                 <div class="form-group">
-                    <label for="modalFirstName" id="modalFirstNameLabel">Vorname</label>
-                    <input type="text" id="modalFirstName" required>
+                    <label for="absenceFirstName" id="absenceFirstNameLabel">الاسم الأول</label>
+                    <input type="text" id="absenceFirstName" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="modalLastName" id="modalLastNameLabel">Nachname</label>
-                    <input type="text" id="modalLastName" required>
+                    <label for="absenceLastName" id="absenceLastNameLabel">الاسم الثاني</label>
+                    <input type="text" id="absenceLastName" required>
                 </div>
                 
                 <div class="buttons-container">
-                    <button type="submit" class="btn btn-secondary" id="modalSubmitBtn">تسجيل الحضور</button>
+                    <button type="submit" class="btn btn-absence" id="absenceSubmitBtn">تسجيل الغياب</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // رابط Google Apps Script المقدم من المستخدم
         const API_URL = 'https://script.google.com/macros/s/AKfycby58GdjjpPFXdmeqDwhomlvphVNY2_ycBQ59kWbZbxwcTsCTtJq-0D5tEp1mNHJnPQIXw/exec';
         
-        // تعريف الفصول حسب الأرقام المطلوبة
         const classes = {
-            1: "معلمة جنين - الاثنين",
-            2: "معلمة احلام - الاثنين",
-            3: "معلمة ايات العدوي - الاثنين",
-            4: "معلمة سمر - الاثنين",
-            5: "معلمة الاء زيادة - الاثنين",
-            6: "معلمة رانبا - الاثنين",
-            7: "معلم عبادة الاشقر - الاثنين",
-            8: "معلمة اسماء السلطان - الاثنين",
-            9: "معلمة سناء - الاثنين",
-            10: "معلمة فوزية - الخميس",
-            11: "معلمة ام عمر - الخميس",
-            12: "معلمة براء - الخميس",
-            13: "معلمة ناريمان صالح - الخميس",
-            14: "معلم عثمان الخطيب - الخميس",
-            15: "معلمة .ام براء - الخميس",
-            16: "معلمة مروة - الخميس",
-            17: "معلمة روان - الخميس",
-            18: "معلمة سمر - الخميس",
-            19: "معلمة سناء - الخميس",
-            20: "معلمة شيماء - الجمعة",
-            21: "معلمة دانا - الجمعة",
-            22: "محمود دغميس - الجمعة",
-            23: "معلمة أمامة أبو حطب - الجمعة",
-            24: "معلمة بسمة - الجمعة",
-            25: "معلمة ماريا - الجمعة",
-            26: "احمد الشرقاوي - الجمعة",
-            27: "معلم احمد الشرقاوي - الاحد",
-            28: "معلمة يسرا السلطان - الاحد",
-            29: "الشيخ عمار - الاحد",
-            30: "المعلمة ريعان عسقول - الخميس",
-            31: "الشيخ اسامة السلطان - الاحد",
-            32: "الشيخ أمين - الاحد",
-            33: "المعلمة سناء - الاربعاء",
-            34: "المعلمة سناء - الاحد",
-            35: "صف النورانية الاول - الخميس",
-            36: "صف النورانية الثاني - الخميس"
+            1: "معلمة جنين - الاثنين", 2: "معلمة احلام - الاثنين", 3: "معلمة ايات العدوي - الاثنين",
+            4: "معلمة سمر - الاثنين", 5: "معلمة الاء زيادة - الاثنين", 6: "معلمة رانبا - الاثنين",
+            7: "معلم عبادة الاشقر - الاثنين", 8: "معلمة اسماء السلطان - الاثنين", 9: "معلمة سناء - الاثنين",
+            10: "معلمة فوزية - الخميس", 11: "معلمة ام عمر - الخميس", 12: "معلمة براء - الخميس",
+            13: "معلمة ناريمان صالح - الخميس", 14: "معلم عثمان الخطيب - الخميس", 15: "معلمة .ام براء - الخميس",
+            16: "معلمة مروة - الخميس", 17: "معلمة روان - الخميس", 18: "معلمة سمر - الخميس", 19: "معلمة سناء - الخميس",
+            20: "معلمة شيماء - الجمعة", 21: "معلمة دانا - الجمعة", 22: "محمود دغميس - الجمعة",
+            23: "معلمة أمامة أبو حطب - الجمعة", 24: "معلمة بسمة - الجمعة", 25: "معلمة ماريا - الجمعة",
+            26: "احمد الشرقاوي - الجمعة", 27: "معلم احمد الشرقاوي - الاحد", 28: "معلمة يسرا السلطان - الاحد",
+            29: "الشيخ عمار - الاحد", 30: "المعلمة ريعان عسقول - الخميس", 31: "الشيخ اسامة السلطان - الاحد",
+            32: "الشيخ أمين - الاحد", 33: "المعلمة سناء - الاربعاء", 34: "المعلمة سناء - الاحد",
+            35: "صف النورانية الاول - الخميس", 36: "صف النورانية الثاني - الخميس"
         };
         
-        // متغير لتخزين معرف الفاصل الزمني للتحديث التلقائي
-        let refreshInterval;
-        
         document.addEventListener('DOMContentLoaded', function() {
-            // العناصر الرئيسية
             const form = document.getElementById('attendanceForm');
             const firstNameInput = document.getElementById('firstName');
             const lastNameInput = document.getElementById('lastName');
             const attendanceRecords = document.getElementById('attendanceRecords');
             const languageSwitcher = document.getElementById('languageSwitcher');
             const emptyState = document.getElementById('emptyState');
-            const mainContent = document.getElementById('mainContent');
-            const pageHeader = document.getElementById('pageHeader');
-            const addStudentBtn = document.getElementById('addStudentBtn');
-            const studentModal = document.getElementById('studentModal');
+            const absenceBtn = document.getElementById('absenceBtn');
+            const absenceModal = document.getElementById('absenceModal');
             const modalClose = document.getElementById('modalClose');
-            const modalForm = document.getElementById('modalForm');
-            const modalFirstName = document.getElementById('modalFirstName');
-            const modalLastName = document.getElementById('modalLastName');
+            const absenceForm = document.getElementById('absenceForm');
+            const absenceFirstName = document.getElementById('absenceFirstName');
+            const absenceLastName = document.getElementById('absenceLastName');
             const classNameElement = document.getElementById('className');
             
-            // الحصول على رقم الفصل من الرابط
             const urlParams = new URLSearchParams(window.location.search);
             const classNumber = parseInt(urlParams.get('class'));
             
-            // تحديد الفصل بناءً على الرقم
             let currentClass = 'غير محدد';
             let classId = classNumber;
             
             if (classNumber && classes[classNumber]) {
                 currentClass = classes[classNumber];
             } else if (classNumber) {
-                // إذا كان الرقم غير موجود في القائمة، نستخدم الرقم كمعرف للفصل
                 currentClass = `فصل ${classNumber}`;
             }
             
             classNameElement.textContent = `الفصل: ${currentClass}`;
             
-            // النصوص باللغتين
             const texts = {
                 ar: {
-                    firstNameLabel: "الاسم الأول",
-                    lastNameLabel: "الاسم الثاني",
-                    submitBtn: "تسجيل الحضور",
-                    addStudentBtn: "طالب آخر +",
-                    attendanceListTitle: "سجل الحضور",
-                    languageBtn: "Deutsch",
-                    emptyState: "لم يتم تسجيل أي حضور بعد",
+                    firstNameLabel: "الاسم الأول", lastNameLabel: "الاسم الثاني",
+                    submitBtn: "تسجيل الحضور", absenceBtn: "تسجيل غياب",
+                    attendanceListTitle: "سجل الحضور والغياب", languageBtn: "Deutsch",
+                    emptyState: "لم يتم تسجيل أي حضور أو غياب بعد",
                     successMessage: "تم تسجيل حضور {name} بنجاح",
+                    absenceSuccessMessage: "تم تسجيل غياب {name} بنجاح",
                     errorMessage: "يرجى ملء جميع الحقول",
-                    modalTitle: "تسجيل حضور طالب آخر",
-                    modalFirstNameLabel: "Vorname",
-                    modalLastNameLabel: "Nachname",
+                    modalTitle: "تسجيل غياب طالب",
                     className: `الفصل: ${currentClass}`
                 },
                 de: {
-                    firstNameLabel: "Vorname",
-                    lastNameLabel: "Nachname",
-                    submitBtn: "Anwesenheit registrieren",
-                    addStudentBtn: "Anderer Schüler +",
-                    attendanceListTitle: "Anwesenheitsliste",
-                    languageBtn: "العربية",
-                    emptyState: "Noch keine Anwesenheit registriert",
+                    firstNameLabel: "Vorname", lastNameLabel: "Nachname",
+                    submitBtn: "Anwesenheit registrieren", absenceBtn: "Abwesenheit registrieren",
+                    attendanceListTitle: "Anwesenheits- und Abwesenheitsliste", languageBtn: "العربية",
+                    emptyState: "Noch keine Anwesenheit oder Abwesenheit registriert",
                     successMessage: "Anwesenheit von {name} erfolgreich registriert",
+                    absenceSuccessMessage: "Abwesenheit von {name} erfolgreich registriert",
                     errorMessage: "Bitte füllen Sie alle Felder aus",
-                    modalTitle: "Anwesenheit eines anderen Schülers registrieren",
-                    modalFirstNameLabel: "Vorname",
-                    modalLastNameLabel: "Nachname",
+                    modalTitle: "Abwesenheit eines Schülers registrieren",
                     className: `Klasse: ${currentClass}`
                 }
             };
             
-            // التحقق من وجود الكوكي وتعيين القيمة للطالب الأساسي
             const savedStudentName = getCookie('studentName');
             if (savedStudentName) {
                 const names = savedStudentName.split(' ');
@@ -628,37 +551,15 @@
                 lastNameInput.value = names[1] || '';
             }
             
-            // جلب بيانات الحضور عند تحميل الصفحة
             fetchAttendance();
             
-            // بدء التحديث التلقائي كل 10 ثوانٍ
-            startAutoRefresh();
-            
-            // تغيير اللغة مع animation
             let currentLang = 'ar';
-            let isAnimating = false;
             
             languageSwitcher.addEventListener('click', function() {
-                if (isAnimating) return;
-                
-                isAnimating = true;
-                // إضافة تأثير fade-out للهيدر والمحتوى
-                pageHeader.classList.add('fade-out');
-                mainContent.classList.add('fade-out');
-                
-                // بعد انتهاء الـ animation، تغيير اللغة وإعادة الظهور
-                setTimeout(() => {
-                    currentLang = currentLang === 'ar' ? 'de' : 'ar';
-                    updateLanguage(currentLang);
-                    
-                    // إزالة fade-out لإظهار المحتوى مرة أخرى
-                    pageHeader.classList.remove('fade-out');
-                    mainContent.classList.remove('fade-out');
-                    isAnimating = false;
-                }, 500);
+                currentLang = currentLang === 'ar' ? 'de' : 'ar';
+                updateLanguage(currentLang);
             });
             
-            // تحديث اللغة
             function updateLanguage(lang) {
                 document.documentElement.lang = lang;
                 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -666,119 +567,98 @@
                 document.getElementById('firstNameLabel').textContent = texts[lang].firstNameLabel;
                 document.getElementById('lastNameLabel').textContent = texts[lang].lastNameLabel;
                 document.getElementById('submitBtn').textContent = texts[lang].submitBtn;
-                document.getElementById('addStudentBtn').textContent = texts[lang].addStudentBtn;
+                document.getElementById('absenceBtn').textContent = texts[lang].absenceBtn;
                 document.getElementById('attendanceListTitle').textContent = texts[lang].attendanceListTitle;
                 document.getElementById('modalTitle').textContent = texts[lang].modalTitle;
-                document.getElementById('modalFirstNameLabel').textContent = texts[lang].modalFirstNameLabel;
-                document.getElementById('modalLastNameLabel').textContent = texts[lang].modalLastNameLabel;
-                document.getElementById('modalSubmitBtn').textContent = texts[lang].submitBtn;
+                document.getElementById('absenceSubmitBtn').textContent = texts[lang].absenceBtn;
                 document.getElementById('className').textContent = texts[lang].className;
                 languageSwitcher.textContent = texts[lang].languageBtn;
                 emptyState.textContent = texts[lang].emptyState;
             }
             
-            // بدء التحديث التلقائي
-            function startAutoRefresh() {
-                // تحديث البيانات كل 10 ثوانٍ
-                refreshInterval = setInterval(fetchAttendance, 10000);
-            }
-            
-            // إيقاف التحديث التلقائي
-            function stopAutoRefresh() {
-                if (refreshInterval) {
-                    clearInterval(refreshInterval);
-                }
-            }
-            
-            // فتح نافذة إضافة طالب جديد
-            addStudentBtn.addEventListener('click', function() {
-                studentModal.style.display = 'flex';
+            absenceBtn.addEventListener('click', function() {
+                absenceModal.style.display = 'flex';
             });
             
-            // إغلاق نافذة إضافة طالب جديد
             modalClose.addEventListener('click', function() {
-                studentModal.style.display = 'none';
-                modalForm.reset();
+                absenceModal.style.display = 'none';
+                absenceForm.reset();
             });
             
-            // إغلاق النافذة عند النقر خارجها
             window.addEventListener('click', function(event) {
-                if (event.target === studentModal) {
-                    studentModal.style.display = 'none';
-                    modalForm.reset();
+                if (event.target === absenceModal) {
+                    absenceModal.style.display = 'none';
+                    absenceForm.reset();
                 }
             });
             
-            // تسجيل الحضور للطالب الأساسي
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                registerAttendance(firstNameInput.value.trim(), lastNameInput.value.trim(), true);
+                registerAttendance(firstNameInput.value.trim(), lastNameInput.value.trim(), true, 'attendance');
             });
             
-            // تسجيل الحضور للطالب الآخر
-            modalForm.addEventListener('submit', function(e) {
+            absenceForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                registerAttendance(modalFirstName.value.trim(), modalLastName.value.trim(), false);
-                studentModal.style.display = 'none';
-                modalForm.reset();
+                registerAttendance(absenceFirstName.value.trim(), absenceLastName.value.trim(), false, 'absence');
+                absenceModal.style.display = 'none';
+                absenceForm.reset();
             });
             
-            // وظيفة تسجيل الحضور
-            function registerAttendance(firstName, lastName, isMainStudent) {
+            function registerAttendance(firstName, lastName, isMainStudent, type) {
                 if (firstName && lastName) {
-                    // حفظ بيانات الطالب الأساسي في الكوكي
-                    if (isMainStudent) {
+                    if (isMainStudent && type === 'attendance') {
                         setCookie('studentName', `${firstName} ${lastName}`, 30);
                     }
                     
-                    // إرسال البيانات إلى API
                     const now = new Date();
                     const timeString = now.toLocaleString();
                     
-                    showMessage(currentLang === 'ar' ? 'جاري تسجيل الحضور...' : 'Anwesenheit wird registriert...', 'loading');
+                    showMessage(currentLang === 'ar' ? 
+                        (type === 'attendance' ? 'جاري تسجيل الحضور...' : 'جاري تسجيل الغياب...') :
+                        (type === 'attendance' ? 'Anwesenheit wird registriert...' : 'Abwesenheit wird registriert...'), 'loading');
                     
-                    // استخدام رقم الفصل كمعرف عند الإرسال
                     const classIdentifier = classId || currentClass;
                     
-                    // إنشاء رابط API مع المعلمات
                     const url = `${API_URL}?action=add&first=${encodeURIComponent(firstName)}&second=${encodeURIComponent(lastName)}&class=${encodeURIComponent(classIdentifier)}&time=${encodeURIComponent(timeString)}`;
                     
                     fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.text();
-                    })
+                    .then(response => response.text())
                     .then(result => {
                         console.log('API Response:', result);
                         
-                        // إخفاء رسالة عدم وجود بيانات
                         if (emptyState.style.display !== 'none') {
                             emptyState.style.display = 'none';
                         }
                         
-                        // مسح الحقول للطالب الأساسي فقط
-                        if (isMainStudent) {
+                        const listItem = document.createElement('li');
+                        listItem.className = type === 'attendance' ? 'attendance-item' : 'absence-item';
+                        listItem.innerHTML = `
+                            <span class="student-name">${firstName} ${lastName}</span>
+                            <span class="timestamp">${timeString} (${type === 'attendance' ? 'حضور' : 'غياب'})</span>
+                        `;
+                        
+                        attendanceRecords.prepend(listItem);
+                        
+                        if (isMainStudent && type === 'attendance') {
                             lastNameInput.value = '';
                         }
                         
-                        // عرض رسالة نجاح
-                        showMessage(texts[currentLang].successMessage.replace('{name}', `${firstName} ${lastName}`), 'success');
+                        const successMessage = type === 'attendance' ? texts[currentLang].successMessage : texts[currentLang].absenceSuccessMessage;
+                        showMessage(successMessage.replace('{name}', `${firstName} ${lastName}`), 'success');
                         
-                        // جلب البيانات المحدثة من السيرفر
                         fetchAttendance();
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showMessage(currentLang === 'ar' ? 'حدث خطأ في التسجيل' : 'Fehler bei der Registrierung', 'error');
+                        showMessage(currentLang === 'ar' ? 
+                            (type === 'attendance' ? 'حدث خطأ في تسجيل الحضور' : 'حدث خطأ في تسجيل الغياب') :
+                            (type === 'attendance' ? 'Fehler bei der Anwesenheitsregistrierung' : 'Fehler bei der Abwesenheitsregistrierung'), 'error');
                     });
                 } else {
                     showMessage(texts[currentLang].errorMessage, 'error');
                 }
             }
             
-            // وظيفة لجلب بيانات الحضور من API
             function fetchAttendance() {
                 const url = `${API_URL}?action=get`;
                 
@@ -792,26 +672,19 @@
                     .then(data => {
                         console.log('Fetched data:', data);
                         
-                        // استخدام رقم الفصل كمعرف للتصفية
                         const classIdentifier = classId || currentClass;
-                        
-                        // تصفية البيانات للفصل الحالي فقط
                         const classData = data.filter(item => {
-                            return item.class == classIdentifier; // استخدام == للسماح بمقارنة الأرقام والنصوص
+                            return item.class == classIdentifier;
                         });
                         
                         if (classData.length > 0) {
-                            // إخفاء رسالة عدم وجود بيانات
-                            if (emptyState.style.display !== 'none') {
-                                emptyState.style.display = 'none';
-                            }
-                            
-                            // مسح القائمة الحالية
+                            emptyState.style.display = 'none';
                             attendanceRecords.innerHTML = '';
                             
-                            // إضافة البيانات إلى القائمة
                             classData.forEach(student => {
                                 const listItem = document.createElement('li');
+                                // نعتبر جميع البيانات الموجودة حضوراً إلا إذا كان محدداً غير ذلك
+                                listItem.className = 'attendance-item';
                                 listItem.innerHTML = `
                                     <span class="student-name">${student.first} ${student.second}</span>
                                     <span class="timestamp">${student.time}</span>
@@ -819,34 +692,31 @@
                                 attendanceRecords.appendChild(listItem);
                             });
                         } else {
-                            // عرض رسالة عدم وجود بيانات
                             emptyState.style.display = 'block';
                         }
                     })
                     .catch(error => {
-                        console.error('Error fetching attendance data:', error);
-                        // في حالة الخطأ، نعرض رسالة خطأ مؤقتة
-                        if (attendanceRecords.children.length === 0 || (attendanceRecords.children.length === 1 && attendanceRecords.children[0].classList.contains('empty-state'))) {
-                            emptyState.textContent = currentLang === 'ar' ? 'خطأ في تحميل البيانات' : 'Fehler beim Laden der Daten';
+                        console.error('Error fetching data:', error);
+                        if (attendanceRecords.children.length === 0 || 
+                            (attendanceRecords.children.length === 1 && 
+                             attendanceRecords.children[0].classList.contains('empty-state'))) {
+                            emptyState.textContent = currentLang === 'ar' ? 
+                                'خطأ في تحميل البيانات' : 'Fehler beim Laden der Daten';
                             emptyState.style.display = 'block';
                         }
                     });
             }
             
-            // وظيفة لعرض الرسائل
             function showMessage(message, type) {
-                // إزالة أي رسالة سابقة
                 const existingMessage = document.querySelector('.message');
                 if (existingMessage) {
                     existingMessage.remove();
                 }
                 
-                // إنشاء رسالة جديدة
                 const messageElement = document.createElement('div');
                 messageElement.className = `message ${type}`;
                 messageElement.textContent = message;
                 
-                // إضافة زر الإغلاق
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'close-btn';
                 closeBtn.innerHTML = '&times;';
@@ -857,7 +727,6 @@
                 messageElement.appendChild(closeBtn);
                 document.body.appendChild(messageElement);
                 
-                // إزالة الرسالة تلقائياً بعد 3 ثوانٍ
                 setTimeout(() => {
                     if (messageElement.parentNode) {
                         messageElement.remove();
@@ -865,7 +734,6 @@
                 }, 3000);
             }
             
-            // وظائف إدارة الكوكيز
             function setCookie(name, value, days) {
                 const d = new Date();
                 d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -889,11 +757,6 @@
                 }
                 return "";
             }
-            
-            // إيقاف التحديث التلقائي عند إغلاق الصفحة
-            window.addEventListener('beforeunload', function() {
-                stopAutoRefresh();
-            });
         });
     </script>
 </body>
