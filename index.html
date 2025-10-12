@@ -628,7 +628,7 @@
             if (refreshInterval) {
                 clearInterval(refreshInterval);
             }
-            refreshInterval = setInterval(fetchAttendance, 10000);
+            refreshInterval = setInterval(fetchAttendance, 500000);
             console.log('Auto-refresh started: updating every 10 seconds');
         }
         
