@@ -543,41 +543,41 @@
         classNameElement.textContent = `الفصل: ${currentClass}`;
         
         // النصوص باللغتين
-        const texts = {
-            ar: {
-                firstNameLabel: "الاسم الأول", 
-                lastNameLabel: "الاسم الثاني",
-                submitBtn: "تسجيل الحضور", 
-                absenceBtn: "تسجيل غياب",
-                attendanceListTitle: "سجل الحضور والغياب", 
-                languageBtn: "Deutsch",
-                emptyState: "لم يتم تسجيل أي حضور أو غياب بعد",
-                successMessage: "تم تسجيل حضور {name} بنجاح",
-                absenceSuccessMessage: "تم تسجيل غياب {name} بنجاح",
-                errorMessage: "يرجى ملء جميع الحقول",
-                modalTitle: "تسجيل غياب طالب",
-                className: `الفصل: ${currentClass}`,
-                present: "حضور",
-                absent: "غياب"
-            },
-            de: {
-                firstNameLabel: "Vorname", 
-                lastNameLabel: "Nachname",
-                submitBtn: "Anwesenheit registrieren", 
-                absenceBtn: "Abwesenheit registrieren",
-                attendanceListTitle: "Anwesenheits- und Abwesenheitsliste", 
-                languageBtn: "العربية",
-                emptyState: "Noch keine Anwesenheit oder Abwesenheit registriert",
-                successMessage: "Anwesenheit von {name} erfolgreich registriert",
-                absenceSuccessMessage: "Abwesenheit von {name} erfolgreich registriert",
-                errorMessage: "Bitte füllen Sie alle Felder aus",
-                modalTitle: "Abwesenheit eines Schülers registrieren",
-                className: `Klasse: ${currentClass}`,
-                present: "Anwesend",
-                absent: "Abwesend"
-            }
-        };
-        
+        // النصوص باللغتين
+const texts = {
+    ar: {
+        firstNameLabel: "الاسم الأول", 
+        lastNameLabel: "الاسم الثاني",
+        submitBtn: "تسجيل الحضور", 
+        absenceBtn: "تسجيل غياب",
+        attendanceListTitle: "سجل الحضور والغياب", 
+        languageBtn: "Deutsch",
+        emptyState: "لم يتم تسجيل أي حضور أو غياب بعد",
+        successMessage: "تم تسجيل حضور {name} بنجاح",
+        absenceSuccessMessage: "تم تسجيل غياب {name} بنجاح",
+        errorMessage: "يرجى ملء جميع الحقول",
+        modalTitle: "تسجيل غياب طالب",
+        className: `الفصل: ${currentClass}`,
+        present: "حضور",        // أضف هذا السطر
+        absent: "غياب"          // أضف هذا السطر
+    },
+    de: {
+        firstNameLabel: "Vorname", 
+        lastNameLabel: "Nachname",
+        submitBtn: "Anwesenheit registrieren", 
+        absenceBtn: "Abwesenheit registrieren",
+        attendanceListTitle: "Anwesenheits- und Abwesenheitsliste", 
+        languageBtn: "العربية",
+        emptyState: "Noch keine Anwesenheit oder Abwesenheit registriert",
+        successMessage: "Anwesenheit von {name} erfolgreich registriert",
+        absenceSuccessMessage: "Abwesenheit von {name} erfolgreich registriert",
+        errorMessage: "Bitte füllen Sie alle Felder aus",
+        modalTitle: "Abwesenheit eines Schülers registrieren",
+        className: `Klasse: ${currentClass}`,
+        present: "Anwesend",    // أضف هذا السطر
+        absent: "Abwesend"      // أضف هذا السطر
+    }
+};
         // التحقق من وجود الكوكي وتعيين القيمة للطالب الأساسي
         const savedStudentName = getCookie('studentName');
         if (savedStudentName) {
@@ -787,18 +787,16 @@
                 classData.forEach(student => {
                     const listItem = document.createElement('li');
                     const attendanceType = student.attendance === 'غياب' ? 'غياب' : 'حضور';
-                    listItem.className = attendanceType === 'حضور' ? 'attendance-item' : 'absence-item';
-                    listItem.innerHTML = `
-                        <div>
-                            <span class="student-name">${student.first} ${student.second}</span>
-                            <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
-                                ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
-                            </span>
-                        </div>
-                        <span class="timestamp">${student.time}</span>
-                    `;
-                    attendanceRecords.appendChild(listItem);
-                });
+// في دالة processAttendanceData، غير هذا الجزء:
+listItem.innerHTML = `
+    <div>
+        <span class="student-name">${student.first} ${student.second}</span>
+        <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
+            ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
+        </span>
+    </div>
+    <span class="timestamp">${student.time}</span>
+`;
             } else {
                 // عرض رسالة عدم وجود بيانات
                 emptyState.style.display = 'block';
