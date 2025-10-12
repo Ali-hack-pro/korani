@@ -34,11 +34,6 @@
         ::-webkit-scrollbar-thumb {
             background: var(--primary-color);
             border-radius: 10px;
-            transition: background 0.3s;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2980b9;
         }
         
         body {
@@ -90,7 +85,6 @@
             background: #e8f4fc;
             padding: 8px 15px;
             border-radius: 20px;
-            text-align: center;
         }
         
         .header-controls {
@@ -140,7 +134,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            transition: border-color 0.3s;
         }
         
         input[type="text"]:focus {
@@ -214,8 +208,7 @@
         }
         
         #attendanceRecords li {
-            background-color: #f1f1f1;
-            padding: 10px 15px;
+            padding: 12px 15px;
             margin-bottom: 10px;
             border-radius: 8px;
             display: flex;
@@ -235,17 +228,13 @@
         }
         
         .attendance-item {
-            background-color: var(--secondary-color) !important; /* لون جديد للحضور */
-            color: white; /* لجعل النص واضحاً */
+            background-color: #e8f4fc;
+            border-left: 4px solid var(--primary-color);
         }
         
         .absence-item {
-            background-color: var(--absence-color) !important; /* لون جديد للغياب */
-            color: white; /* لجعل النص واضحاً */
-        }
-
-        .attendance-item .timestamp, .absence-item .timestamp {
-            color: rgba(255, 255, 255, 0.8) !important;
+            background-color: #fde8e8;
+            border-left: 4px solid var(--absence-color);
         }
         
         .timestamp {
@@ -255,6 +244,22 @@
         
         .student-name {
             font-weight: bold;
+        }
+        
+        .attendance-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 8px;
+            color: white;
+        }
+        
+        .status-present {
+            background-color: var(--secondary-color);
+        }
+        
+        .status-absent {
+            background-color: var(--absence-color);
         }
         
         .empty-state {
@@ -453,6 +458,7 @@
         </div>
     </div>
 
+    <!-- نافذة تسجيل الغياب -->
     <div class="modal" id="absenceModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -478,8 +484,7 @@
     </div>
 
     <script>
-        // *** تأكد من تحديث هذا الرابط بعد نشر التطبيق الجديد (Publish -> Deploy as web app) ***
-        const API_URL = 'https://script.google.com/macros/s/AKfycby58GdjjpPFXdmeqDwhomlvphVNY2_ycBQ59kWbZbxwcTsCTtJq-0D5tEp1mNHJnPQIXw/exec'; 
+        const API_URL = 'https://script.google.com/macros/s/AKfycby58GdjjpPFXdmeqDwhomlvphVNY2_ycBQ59kWbZbxwcTsCTtJq-0D5tEp1mNHJnPQIXw/exec';
         
         const classes = {
             1: "معلمة جنين - الاثنين", 2: "معلمة احلام - الاثنين", 3: "معلمة ايات العدوي - الاثنين",
@@ -496,7 +501,12 @@
             35: "صف النورانية الاول - الخميس", 36: "صف النورانية الثاني - الخميس"
         };
         
+        // متغيرات النظام
+        let refreshInterval;
+        let currentLang = 'ar';
+        
         document.addEventListener('DOMContentLoaded', function() {
+            // العناصر الرئيسية
             const form = document.getElementById('attendanceForm');
             const firstNameInput = document.getElementById('firstName');
             const lastNameInput = document.getElementById('lastName');
@@ -511,6 +521,7 @@
             const absenceLastName = document.getElementById('absenceLastName');
             const classNameElement = document.getElementById('className');
             
+            // الحصول على رقم الفصل من الرابط
             const urlParams = new URLSearchParams(window.location.search);
             const classNumber = parseInt(urlParams.get('class'));
             
@@ -525,31 +536,43 @@
             
             classNameElement.textContent = `الفصل: ${currentClass}`;
             
+            // النصوص باللغتين
             const texts = {
                 ar: {
-                    firstNameLabel: "الاسم الأول", lastNameLabel: "الاسم الثاني",
-                    submitBtn: "تسجيل الحضور", absenceBtn: "تسجيل غياب",
-                    attendanceListTitle: "سجل الحضور والغياب", languageBtn: "Deutsch",
+                    firstNameLabel: "الاسم الأول", 
+                    lastNameLabel: "الاسم الثاني",
+                    submitBtn: "تسجيل الحضور", 
+                    absenceBtn: "تسجيل غياب",
+                    attendanceListTitle: "سجل الحضور والغياب", 
+                    languageBtn: "Deutsch",
                     emptyState: "لم يتم تسجيل أي حضور أو غياب بعد",
                     successMessage: "تم تسجيل حضور {name} بنجاح",
                     absenceSuccessMessage: "تم تسجيل غياب {name} بنجاح",
                     errorMessage: "يرجى ملء جميع الحقول",
                     modalTitle: "تسجيل غياب طالب",
-                    className: `الفصل: ${currentClass}`
+                    className: `الفصل: ${currentClass}`,
+                    present: "حضور",
+                    absent: "غياب"
                 },
                 de: {
-                    firstNameLabel: "Vorname", lastNameLabel: "Nachname",
-                    submitBtn: "Anwesenheit registrieren", absenceBtn: "Abwesenheit registrieren",
-                    attendanceListTitle: "Anwesenheits- und Abwesenheitsliste", languageBtn: "العربية",
+                    firstNameLabel: "Vorname", 
+                    lastNameLabel: "Nachname",
+                    submitBtn: "Anwesenheit registrieren", 
+                    absenceBtn: "Abwesenheit registrieren",
+                    attendanceListTitle: "Anwesenheits- und Abwesenheitsliste", 
+                    languageBtn: "العربية",
                     emptyState: "Noch keine Anwesenheit oder Abwesenheit registriert",
                     successMessage: "Anwesenheit von {name} erfolgreich registriert",
                     absenceSuccessMessage: "Abwesenheit von {name} erfolgreich registriert",
                     errorMessage: "Bitte füllen Sie alle Felder aus",
                     modalTitle: "Abwesenheit eines Schülers registrieren",
-                    className: `Klasse: ${currentClass}`
+                    className: `Klasse: ${currentClass}`,
+                    present: "Anwesend",
+                    absent: "Abwesend"
                 }
             };
             
+            // التحقق من وجود الكوكي وتعيين القيمة للطالب الأساسي
             const savedStudentName = getCookie('studentName');
             if (savedStudentName) {
                 const names = savedStudentName.split(' ');
@@ -557,11 +580,13 @@
                 lastNameInput.value = names[1] || '';
             }
             
-            // جلب البيانات عند التحميل
+            // جلب بيانات الحضور عند تحميل الصفحة
             fetchAttendance();
             
-            let currentLang = 'ar';
+            // بدء التحديث التلقائي كل 10 ثوانٍ
+            startAutoRefresh();
             
+            // تغيير اللغة
             languageSwitcher.addEventListener('click', function() {
                 currentLang = currentLang === 'ar' ? 'de' : 'ar';
                 updateLanguage(currentLang);
@@ -577,43 +602,37 @@
                 document.getElementById('absenceBtn').textContent = texts[lang].absenceBtn;
                 document.getElementById('attendanceListTitle').textContent = texts[lang].attendanceListTitle;
                 document.getElementById('modalTitle').textContent = texts[lang].modalTitle;
+                document.getElementById('absenceFirstNameLabel').textContent = texts[lang].firstNameLabel;
+                document.getElementById('absenceLastNameLabel').textContent = texts[lang].lastNameLabel;
                 document.getElementById('absenceSubmitBtn').textContent = texts[lang].absenceBtn;
                 document.getElementById('className').textContent = texts[lang].className;
                 languageSwitcher.textContent = texts[lang].languageBtn;
                 emptyState.textContent = texts[lang].emptyState;
-                // يجب تحديث سجلات الحضور الموجودة باللغة الجديدة
-                updateAttendanceRecordsLanguage(lang);
             }
-
-            function updateAttendanceRecordsLanguage(lang) {
-                const records = attendanceRecords.querySelectorAll('li:not(.empty-state)');
-                records.forEach(li => {
-                    const timestampSpan = li.querySelector('.timestamp');
-                    if (timestampSpan) {
-                        const isAttendance = li.classList.contains('attendance-item');
-                        const statusText = isAttendance ? 
-                            (lang === 'ar' ? 'حضور' : 'Anwesenheit') : 
-                            (lang === 'ar' ? 'غياب' : 'Abwesenheit');
-                        // نعتمد على أن النص الحالي هو: الوقت (الحالة)
-                        timestampSpan.textContent = timestampSpan.textContent.replace(/\(([^)]+)\)$/, `(${statusText})`);
-                    }
-                });
-            }
-
             
+            // بدء التحديث التلقائي
+            function startAutoRefresh() {
+                // إيقاف أي تحديث سابق
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+                // تحديث البيانات كل 10 ثوانٍ
+                refreshInterval = setInterval(fetchAttendance, 10000);
+                console.log('Auto-refresh started: updating every 10 seconds');
+            }
+            
+            // فتح نافذة تسجيل الغياب
             absenceBtn.addEventListener('click', function() {
-                // نقل الاسم الأول في حال كان موجوداً في حقل الحضور
-                absenceFirstName.value = firstNameInput.value.trim();
-                absenceLastName.value = lastNameInput.value.trim();
-
                 absenceModal.style.display = 'flex';
             });
             
+            // إغلاق نافذة تسجيل الغياب
             modalClose.addEventListener('click', function() {
                 absenceModal.style.display = 'none';
                 absenceForm.reset();
             });
             
+            // إغلاق النافذة عند النقر خارجها
             window.addEventListener('click', function(event) {
                 if (event.target === absenceModal) {
                     absenceModal.style.display = 'none';
@@ -621,24 +640,25 @@
                 }
             });
             
+            // تسجيل الحضور للطالب الأساسي
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                // إضافة 'حضور' كحالة
-                registerAttendance(firstNameInput.value.trim(), lastNameInput.value.trim(), 'حضور', true, 'attendance');
+                registerAttendance(firstNameInput.value.trim(), lastNameInput.value.trim(), true, 'حضور');
             });
             
+            // تسجيل الغياب للطالب الآخر
             absenceForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                // إضافة 'غياب' كحالة
-                registerAttendance(absenceFirstName.value.trim(), absenceLastName.value.trim(), 'غياب', false, 'absence');
+                registerAttendance(absenceFirstName.value.trim(), absenceLastName.value.trim(), false, 'غياب');
                 absenceModal.style.display = 'none';
                 absenceForm.reset();
             });
             
-            // تم تعديل الدالة لإضافة معامل "status"
-            function registerAttendance(firstName, lastName, status, isMainStudent, type) {
+            // وظيفة تسجيل الحضور/الغياب
+            function registerAttendance(firstName, lastName, isMainStudent, attendanceType) {
                 if (firstName && lastName) {
-                    if (isMainStudent && type === 'attendance') {
+                    // حفظ بيانات الطالب الأساسي في الكوكي
+                    if (isMainStudent && attendanceType === 'حضور') {
                         setCookie('studentName', `${firstName} ${lastName}`, 30);
                     }
                     
@@ -646,137 +666,165 @@
                     const timeString = now.toLocaleString();
                     
                     showMessage(currentLang === 'ar' ? 
-                        (type === 'attendance' ? 'جاري تسجيل الحضور...' : 'جاري تسجيل الغياب...') :
-                        (type === 'attendance' ? 'Anwesenheit wird registriert...' : 'Abwesenheit wird registriert...'), 'loading');
+                        (attendanceType === 'حضور' ? 'جاري تسجيل الحضور...' : 'جاري تسجيل الغياب...') :
+                        (attendanceType === 'حضور' ? 'Anwesenheit wird registriert...' : 'Abwesenheit wird registriert...'), 'loading');
                     
                     const classIdentifier = classId || currentClass;
                     
-                    // تم إضافة &status= في الرابط
-                    const url = `${API_URL}?action=add&first=${encodeURIComponent(firstName)}&second=${encodeURIComponent(lastName)}&class=${encodeURIComponent(classIdentifier)}&time=${encodeURIComponent(timeString)}&status=${encodeURIComponent(status)}`;
+                    // إنشاء رابط API مع المعلمات - تأكد من إرسال معلمة attendance
+                    const url = `${API_URL}?action=add&first=${encodeURIComponent(firstName)}&second=${encodeURIComponent(lastName)}&class=${encodeURIComponent(classIdentifier)}&time=${encodeURIComponent(timeString)}&attendance=${encodeURIComponent(attendanceType)}`;
                     
-                    fetch(url)
-                    .then(response => response.json()) // التوقع أن يكون الرد JSON الآن
+                    console.log('Sending request to:', url);
+                    
+                    // استخدام fetch مع mode 'no-cors' لتجنب مشاكل CORS
+                    fetch(url, {
+                        method: 'GET'
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
                     .then(result => {
                         console.log('API Response:', result);
-
-                        if (result.status === "success") {
-                            if (emptyState.style.display !== 'none') {
-                                emptyState.style.display = 'none';
-                            }
-                            
-                            const listItem = document.createElement('li');
-                            // التمييز بين الحضور والغياب
-                            const isAttendance = status === 'حضور';
-                            listItem.className = isAttendance ? 'attendance-item' : 'absence-item';
-                            
-                            const statusDisplay = currentLang === 'ar' ? status : (isAttendance ? 'Anwesenheit' : 'Abwesenheit');
-                            
-                            listItem.innerHTML = `
-                                <span class="student-name">${firstName} ${lastName}</span>
-                                <span class="timestamp">${timeString} (${statusDisplay})</span>
-                            `;
-                            
-                            // إضافة السجل الجديد في البداية
-                            attendanceRecords.prepend(listItem);
-                            
-                            if (isMainStudent && type === 'attendance') {
-                                // مسح الاسم الثاني فقط إذا كان التسجيل حضوراً من النموذج الرئيسي
-                                lastNameInput.value = '';
-                            }
-                            
-                            const successMessage = type === 'attendance' ? texts[currentLang].successMessage : texts[currentLang].absenceSuccessMessage;
-                            showMessage(successMessage.replace('{name}', `${firstName} ${lastName}`), 'success');
-                            
-                            // لا داعي لجلب كل السجلات بعد الإضافة الناجحة، فقط يتم إضافتها محلياً
-                            // fetchAttendance(); // تم إيقافها لتجنب الجلب المكرر
-                        } else {
-                             // في حال وجود خطأ من السيرفر
-                            throw new Error(result.message || "فشل التسجيل");
+                        
+                        // إخفاء رسالة عدم وجود بيانات
+                        if (emptyState.style.display !== 'none') {
+                            emptyState.style.display = 'none';
                         }
+                        
+                        // إضافة السجل محلياً
+                        const listItem = document.createElement('li');
+                        listItem.className = attendanceType === 'حضور' ? 'attendance-item' : 'absence-item';
+                        listItem.innerHTML = `
+                            <div>
+                                <span class="student-name">${firstName} ${lastName}</span>
+                                <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
+                                    ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
+                                </span>
+                            </div>
+                            <span class="timestamp">${timeString}</span>
+                        `;
+                        
+                        attendanceRecords.prepend(listItem);
+                        
+                        // مسح الحقول للطالب الأساسي فقط
+                        if (isMainStudent && attendanceType === 'حضور') {
+                            lastNameInput.value = '';
+                        }
+                        
+                        // عرض رسالة نجاح
+                        const successMessage = attendanceType === 'حضور' ? 
+                            texts[currentLang].successMessage : texts[currentLang].absenceSuccessMessage;
+                        showMessage(successMessage.replace('{name}', `${firstName} ${lastName}`), 'success');
+                        
+                        // جلب البيانات المحدثة من السيرفر بعد ثانية
+                        setTimeout(fetchAttendance, 1000);
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         showMessage(currentLang === 'ar' ? 
-                            `خطأ: ${error.message || (type === 'attendance' ? 'فشل تسجيل الحضور' : 'فشل تسجيل الغياب')}` :
-                            `Fehler: ${error.message || (type === 'attendance' ? 'Fehler bei der Anwesenheitsregistrierung' : 'Fehler bei der Abwesenheitsregistrierung')}`, 'error');
+                            (attendanceType === 'حضور' ? 'حدث خطأ في تسجيل الحضور' : 'حدث خطأ في تسجيل الغياب') :
+                            (attendanceType === 'حضور' ? 'Fehler bei der Anwesenheitsregistrierung' : 'Fehler bei der Abwesenheitsregistrierung'), 'error');
                     });
                 } else {
                     showMessage(texts[currentLang].errorMessage, 'error');
                 }
             }
             
-            // تم تعديل الدالة لعرض حالة الحضور/الغياب
+            // وظيفة لجلب بيانات الحضور من API
             function fetchAttendance() {
                 const url = `${API_URL}?action=get`;
+                console.log('Fetching data from:', url);
                 
                 fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    try {
+                        // محاولة تحليل النص كـ JSON
+                        const data = JSON.parse(text);
                         console.log('Fetched data:', data);
                         
+                        // استخدام رقم الفصل كمعرف للتصفية
                         const classIdentifier = classId || currentClass;
-                        // التصفية بناءً على 'class'
+                        
+                        // تصفية البيانات للفصل الحالي فقط
                         const classData = data.filter(item => {
-                            // مقارنة القيم مع تحويلها إلى سلسلة نصية لضمان المطابقة
-                            return String(item.class) === String(classIdentifier);
+                            return item.class == classIdentifier;
                         });
                         
-                        // ترتيب البيانات: الأحدث أولاً
-                        classData.sort((a, b) => new Date(b.time) - new Date(a.time));
-
-
-                        attendanceRecords.innerHTML = ''; // تفريغ القائمة الحالية
-
+                        console.log('Filtered data for class:', classData);
+                        
                         if (classData.length > 0) {
-                            emptyState.style.display = 'none';
+                            // إخفاء رسالة عدم وجود بيانات
+                            if (emptyState.style.display !== 'none') {
+                                emptyState.style.display = 'none';
+                            }
                             
+                            // مسح القائمة الحالية
+                            attendanceRecords.innerHTML = '';
+                            
+                            // إضافة البيانات إلى القائمة
                             classData.forEach(student => {
                                 const listItem = document.createElement('li');
-                                
-                                const isAttendance = student.attendance === 'حضور';
-                                listItem.className = isAttendance ? 'attendance-item' : 'absence-item';
-                                
-                                const statusDisplay = currentLang === 'ar' ? student.attendance : (isAttendance ? 'Anwesenheit' : 'Abwesenheit');
-
+                                const attendanceType = student.attendance === 'غياب' ? 'غياب' : 'حضور';
+                                listItem.className = attendanceType === 'حضور' ? 'attendance-item' : 'absence-item';
                                 listItem.innerHTML = `
-                                    <span class="student-name">${student.first} ${student.second}</span>
-                                    <span class="timestamp">${student.time} (${statusDisplay})</span>
+                                    <div>
+                                        <span class="student-name">${student.first} ${student.second}</span>
+                                        <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
+                                            ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
+                                        </span>
+                                    </div>
+                                    <span class="timestamp">${student.time}</span>
                                 `;
                                 attendanceRecords.appendChild(listItem);
                             });
                         } else {
-                            // إضافة Empty State مرة أخرى إذا لم تكن هناك بيانات بعد تفريغ القائمة
-                            attendanceRecords.appendChild(emptyState);
+                            // عرض رسالة عدم وجود بيانات
                             emptyState.style.display = 'block';
-                            emptyState.textContent = texts[currentLang].emptyState;
+                            console.log('No data found for class:', classIdentifier);
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching data:', error);
-                        // في حالة وجود خطأ في الجلب، عرض رسالة الخطأ في Empty State
-                        attendanceRecords.innerHTML = '';
-                        attendanceRecords.appendChild(emptyState);
+                    } catch (e) {
+                        console.error('Error parsing JSON:', e);
+                        console.log('Response text:', text);
+                        throw new Error('Invalid JSON response');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching attendance data:', error);
+                    // في حالة الخطأ، نعرض رسالة خطأ مؤقتة
+                    if (attendanceRecords.children.length === 0 || 
+                        (attendanceRecords.children.length === 1 && 
+                         attendanceRecords.children[0].classList.contains('empty-state'))) {
                         emptyState.textContent = currentLang === 'ar' ? 
-                            'خطأ في تحميل البيانات: حاول مرة أخرى.' : 'Fehler beim Laden der Daten: Versuchen Sie es erneut.';
+                            'خطأ في تحميل البيانات' : 'Fehler beim Laden der Daten';
                         emptyState.style.display = 'block';
-                    });
+                    }
+                });
             }
             
+            // وظيفة لعرض الرسائل
             function showMessage(message, type) {
+                // إزالة أي رسالة سابقة
                 const existingMessage = document.querySelector('.message');
                 if (existingMessage) {
                     existingMessage.remove();
                 }
                 
+                // إنشاء رسالة جديدة
                 const messageElement = document.createElement('div');
                 messageElement.className = `message ${type}`;
                 messageElement.textContent = message;
                 
+                // إضافة زر الإغلاق
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'close-btn';
                 closeBtn.innerHTML = '&times;';
@@ -787,6 +835,7 @@
                 messageElement.appendChild(closeBtn);
                 document.body.appendChild(messageElement);
                 
+                // إزالة الرسالة تلقائياً بعد 3 ثوانٍ
                 setTimeout(() => {
                     if (messageElement.parentNode) {
                         messageElement.remove();
@@ -794,6 +843,7 @@
                 }, 3000);
             }
             
+            // وظائف إدارة الكوكيز
             function setCookie(name, value, days) {
                 const d = new Date();
                 d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -817,10 +867,14 @@
                 }
                 return "";
             }
-
-            // تهيئة اللغة عند التحميل إذا كانت هناك لغة محفوظة
-            const savedLang = 'ar'; // يمكنك استخدام كوكي لحفظ اللغة
-            updateLanguage(savedLang); 
+            
+            // إيقاف التحديث التلقائي عند إغلاق الصفحة
+            window.addEventListener('beforeunload', function() {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    console.log('Auto-refresh stopped');
+                }
+            });
         });
     </script>
 </body>
