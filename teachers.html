@@ -193,6 +193,19 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
+
+        /* تخصيص حقول إدخال الغياب */
+        .absence-input {
+            background-color: #ffe6e6;
+            border: 2px solid #ff9999;
+        }
+
+        .absence-input:focus {
+            background-color: #ffcccc;
+            border-color: #ff6666;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 102, 102, 0.2);
+        }
         
         .students-list {
             margin-top: 30px;
@@ -223,6 +236,12 @@
             background-color: #e8f4fc;
             border-left: 4px solid var(--primary-color);
         }
+
+        /* تخصيص عناصر الغياب */
+        .absence-item {
+            background-color: #ffe6e6 !important;
+            border-left: 4px solid var(--danger-color) !important;
+        }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -246,6 +265,22 @@
         .student-class {
             color: #777;
             font-size: 14px;
+        }
+
+        .attendance-badge {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: white;
+            margin-right: 8px;
+        }
+
+        .attendance-present {
+            background-color: var(--secondary-color);
+        }
+
+        .attendance-absent {
+            background-color: var(--danger-color);
         }
         
         .student-actions {
@@ -421,6 +456,16 @@
         body[dir="ltr"] .form-group {
             text-align: left;
         }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -463,17 +508,22 @@
                 </div>
                 
                 <div class="section">
-                    <h3>معلومات الفصل</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>عدد الطلاب:</strong> 
-                            <span id="studentsCount">0</span>
+                    <h3>إضافة غياب طالب</h3>
+                    <form id="addAbsenceForm">
+                        <div class="form-group">
+                            <label for="absenceFirstName">الاسم الأول</label>
+                            <input type="text" id="absenceFirstName" class="absence-input" required>
                         </div>
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>المعلم:</strong> 
-                            <span id="teacherName">-</span>
+                        
+                        <div class="form-group">
+                            <label for="absenceLastName">الاسم الثاني</label>
+                            <input type="text" id="absenceLastName" class="absence-input" required>
                         </div>
-                    </div>
+                        
+                        <button type="submit" class="btn btn-warning" style="width: 100%;">
+                            تسجيل الغياب
+                        </button>
+                    </form>
                 </div>
             </div>
             
@@ -556,6 +606,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // العناصر الرئيسية
         const addStudentForm = document.getElementById('addStudentForm');
+        const addAbsenceForm = document.getElementById('addAbsenceForm');
         const refreshStudentsBtn = document.getElementById('refreshStudentsBtn');
         const studentsRecords = document.getElementById('studentsRecords');
         const emptyState = document.getElementById('emptyState');
@@ -591,6 +642,7 @@
 
         // أحداث النماذج
         addStudentForm.addEventListener('submit', handleAddStudent);
+        addAbsenceForm.addEventListener('submit', handleAddAbsence);
         refreshStudentsBtn.addEventListener('click', fetchStudents);
         confirmDeleteBtn.addEventListener('click', confirmDelete);
         cancelDeleteBtn.addEventListener('click', closeDeleteModal);
@@ -617,7 +669,8 @@
                         first: firstName,
                         second: lastName,
                         class: currentClass,
-                        timestamp: new Date().getTime()
+                        timestamp: new Date().getTime(),
+                        recordType: 'student'
                     };
 
                     // جلب البيانات الحالية أولاً
@@ -645,10 +698,53 @@
             }
         }
 
+        async function handleAddAbsence(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('absenceFirstName').value.trim();
+            const lastName = document.getElementById('absenceLastName').value.trim();
+
+            if (firstName && lastName) {
+                try {
+                    const now = new Date();
+                    const newAbsence = {
+                        first: firstName,
+                        second: lastName,
+                        class: currentClass,
+                        attendance: 'غياب',
+                        time: now.toLocaleString(),
+                        timestamp: now.getTime(),
+                        recordType: 'attendance'
+                    };
+
+                    // جلب البيانات الحالية أولاً
+                    await fetchStudents();
+                    
+                    // إضافة تسجيل الغياب
+                    allStudentsData.push(newAbsence);
+                    
+                    // حفظ في JSONBin
+                    await saveToJSONBin(allStudentsData);
+                    
+                    // تحديث العرض
+                    updateStudentsDisplay();
+                    
+                    // مسح الحقول
+                    addAbsenceForm.reset();
+                    
+                    showMessage('تم تسجيل الغياب بنجاح', 'success');
+                } catch (error) {
+                    console.error('Error adding absence:', error);
+                    showMessage('حدث خطأ في تسجيل الغياب', 'error');
+                }
+            } else {
+                showMessage('يرجى ملء جميع الحقول', 'error');
+            }
+        }
+
         function openDeleteModal(student, index) {
             studentToDelete = { student, index };
             document.getElementById('deleteMessage').textContent = 
-                `هل أنت متأكد من أنك تريد حذف الطالب ${student.first} ${student.second}؟`;
+                `هل أنت متأكد من أنك تريد حذف هذا الطالب؟`;
             deleteModal.style.display = 'flex';
         }
 
@@ -704,24 +800,29 @@
         }
 
         function updateStudentsDisplay() {
-            // تصفية الطلاب للفصل الحالي فقط
-            const classStudents = allStudentsData.filter(student => 
-                student.class === currentClass
+            // تصفية الطلاب المسجلين للفصل الحالي فقط
+            const registeredStudents = allStudentsData.filter(student => 
+                student.class === currentClass && student.recordType === 'student'
+            );
+
+            // تصفية تسجيلات الغياب للفصل الحالي فقط
+            const absenceRecords = allStudentsData.filter(record => 
+                record.class === currentClass && record.recordType === 'attendance' && record.attendance === 'غياب'
             );
 
             studentsRecords.innerHTML = '';
 
-            if (classStudents.length === 0) {
+            if (registeredStudents.length === 0 && absenceRecords.length === 0) {
                 emptyState.style.display = 'block';
                 studentsCountElement.textContent = '0';
                 return;
             }
 
             emptyState.style.display = 'none';
-            studentsCountElement.textContent = classStudents.length;
+            studentsCountElement.textContent = registeredStudents.length;
 
-            // عرض الطلاب
-            classStudents.forEach((student, index) => {
+            // عرض الطلاب المسجلين
+            registeredStudents.forEach((student, index) => {
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
                     <div class="student-info">
@@ -729,7 +830,7 @@
                         <span class="student-class">${student.class}</span>
                     </div>
                     <div class="student-actions">
-                        <button class="btn btn-danger btn-small delete-btn" data-index="${index}">
+                        <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(student)}">
                             حذف
                         </button>
                     </div>
@@ -737,15 +838,37 @@
                 studentsRecords.appendChild(listItem);
             });
 
+            // عرض تسجيلات الغياب
+            if (absenceRecords.length > 0) {
+                const absenceTitle = document.createElement('li');
+                absenceTitle.style.cssText = 'background: #fff3cd; border-left: 4px solid var(--warning-color); font-weight: bold; color: #856404;';
+                absenceTitle.innerHTML = `<div style="width: 100%; text-align: center;">تسجيلات الغياب</div>`;
+                studentsRecords.appendChild(absenceTitle);
+
+                absenceRecords.forEach((record, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'absence-item';
+                    listItem.innerHTML = `
+                        <div class="student-info">
+                            <span class="student-name">${record.first} ${record.second}</span>
+                            <span class="attendance-badge attendance-absent">غياب</span>
+                            <span class="student-class">${record.time}</span>
+                        </div>
+                        <div class="student-actions">
+                            <button class="btn btn-danger btn-small delete-btn" data-index="${allStudentsData.indexOf(record)}">
+                                حذف
+                            </button>
+                        </div>
+                    `;
+                    studentsRecords.appendChild(listItem);
+                });
+            }
+
             // إضافة أحداث الحذف
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    const classStudents = allStudentsData.filter(student => 
-                        student.class === currentClass
-                    );
-                    const actualIndex = allStudentsData.indexOf(classStudents[index]);
-                    openDeleteModal(classStudents[index], actualIndex);
+                    openDeleteModal(allStudentsData[index], index);
                 });
             });
         }
