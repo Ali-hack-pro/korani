@@ -15,7 +15,32 @@
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             --btn-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        
+        /* إضافة شريط التمرير الأزرق */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-radius: 10px;
+    border: 2px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #2980b9, #1c6ea4);
+}
+
+/* للمتصفحات الأخرى */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #3498db #f1f1f1;
+}
+
         * {
             margin: 0;
             padding: 0;
@@ -24,6 +49,8 @@
         }
 
         body {
+                scrollbar-width: thin;
+    scrollbar-color: #3498db #f1f1f1;
             background: linear-gradient(-45deg, #f5f7fa, #c3cfe2, #a1c4fd, #f5f7fa);
             background-size: 400% 400%;
             animation: gradient 5s ease infinite;
@@ -532,11 +559,6 @@
         <header>
             <div class="logo-container">
                 <img src="https://korani.eu/img/logoar.png" alt="شعار الموقع" class="logo">
-                <div class="class-info">
-                    <div class="class-name" id="className">الفصل: غير محدد</div>
-                    <div class="teacher-name" id="teacherName">المعلم: غير محدد</div>
-                    <div class="students-count" id="studentsCount">عدد الطلاب: 0</div>
-                </div>
             </div>
             <div class="header-controls">
                 <a href="attendance.html" class="btn btn-primary" id="attendanceLink">صفحة الحضور</a>
@@ -929,10 +951,6 @@
                     const attendanceSection = document.createElement('div');
                     attendanceSection.className = 'attendance-section';
                     
-                    const attendanceTitle = document.createElement('div');
-                    attendanceTitle.className = 'attendance-title';
-                    attendanceTitle.textContent = 'سجلات الحضور والغياب';
-                    attendanceSection.appendChild(attendanceTitle);
                     
                     const attendanceList = document.createElement('ul');
                     attendanceList.style.listStyleType = 'none';
