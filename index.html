@@ -3,904 +3,845 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تسجيل الحضور والغياب</title>
+    <title>نظام تسجيل الحضور الجديد</title>
+    <link rel="icon" type="image/x-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc4gtYfgStky26hsr3R6qqCsp9LMt4bVBjIg&s">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --absence-color: #e74c3c;
-            --text-color: #333;
-            --light-bg: #f9f9f9;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --btn-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 10px;
-        }
-
         body {
-            background: linear-gradient(-45deg, #f5f7fa, #c3cfe2, #a1c4fd, #f5f7fa);
-            background-size: 400% 400%;
-            animation: gradient 5s ease infinite;
-            color: var(--text-color);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Cairo', sans-serif;
+            height: 100vh;
+            overflow: hidden;
         }
         
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 15px 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo {
-            height: 60px;
-            margin-left: 15px;
-        }
-        
-        .class-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--primary-color);
-            background: #e8f4fc;
-            padding: 8px 15px;
-            border-radius: 20px;
-        }
-        
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .language-switcher {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            box-shadow: var(--btn-shadow);
-        }
-        
-        .language-switcher:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-        
-        .main-content {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: var(--shadow);
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-        
-        .buttons-container {
-            display: flex;
-            flex-direction: column;
-            margin-top: 30px;
-            gap: 15px;
-        }
-        
-        .btn {
-            display: inline-block;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-            text-align: center;
-            box-shadow: var(--btn-shadow);
-            width: 100%;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .btn-attendance {
-            background-color: var(--primary-color);
-        }
-        
-        .btn-attendance:hover {
-            background-color: #2980b9;
-        }
-        
-        .btn-absence {
-            background-color: var(--absence-color);
-        }
-        
-        .btn-absence:hover {
-            background-color: #c0392b;
-        }
-        
-        .attendance-list {
-            margin-top: 30px;
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .attendance-list h2 {
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 10px 0;
-        }
-        
-        #attendanceRecords {
-            list-style-type: none;
-        }
-        
-        #attendanceRecords li {
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        #attendanceRecords li:hover {
-            transform: translateX(5px);
-        }
-        
-        .attendance-item {
-            background-color: #e8f4fc;
-            border-left: 4px solid var(--primary-color);
-        }
-        
-        .absence-item {
-            background-color: #fde8e8;
-            border-left: 4px solid var(--absence-color);
-        }
-        
-        .timestamp {
-            color: #777;
-            font-size: 14px;
-        }
-        
-        .student-name {
-            font-weight: bold;
-        }
-        
-        .attendance-status {
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            margin-right: 8px;
-            color: white;
-        }
-        
-        .status-present {
-            background-color: var(--secondary-color);
-        }
-        
-        .status-absent {
-            background-color: var(--absence-color);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            font-style: italic;
-        }
-        
-        .message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 45px 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            box-shadow: var(--btn-shadow);
-            z-index: 1000;
-            animation: slideIn 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; visibility: hidden; }
-        }
-        
-        .success {
-            background-color: var(--secondary-color);
-        }
-        
-        .error {
-            background-color: var(--absence-color);
-        }
-        
-        .loading {
-            background-color: var(--primary-color);
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 0;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal {
-            display: none;
+        #gradient-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
+            --gradient-color-1: #a960ee;
+            --gradient-color-2: #ff333d;
+            --gradient-color-3: #90e0ff;
+            --gradient-color-4: #ffcb57;
+            z-index: -1;
         }
         
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 500px;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
+        .content-container {
+            height: 100vh;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            justify-content: center;
+            position: relative;
         }
         
-        .modal-title {
-            font-size: 20px;
-            color: var(--primary-color);
-            margin: 0;
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #777;
+        .btn-glow {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            border-radius: 16px;
         }
         
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .logo-container {
-                margin-bottom: 15px;
-            }
-            
-            .header-controls {
-                width: 100%;
-                justify-content: center;
-                margin-top: 10px;
-            }
-            
-            .message {
-                right: 10px;
-                left: 10px;
-                text-align: center;
-            }
+        .btn-glow:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
         }
         
-        body[dir="ltr"] {
-            text-align: left;
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 2s steps(20, end), blink-caret 0.75s step-end infinite;
+            animation-fill-mode: forwards;
         }
         
-        body[dir="ltr"] .logo {
-            margin-left: 0;
-            margin-right: 15px;
+        .typewriter-ar {
+            border-left: 2px solid white;
         }
         
-        body[dir="ltr"] header {
-            flex-direction: row-reverse;
+        .typewriter-de {
+            border-right: 2px solid white;
         }
         
-        body[dir="ltr"] #attendanceRecords li:hover {
-            transform: translateX(-5px);
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
         }
         
-        body[dir="ltr"] .message {
-            right: auto;
-            left: 20px;
+        @keyframes blink-caret {
+            from, to { border-color: white }
+            50% { border-color: transparent }
+        }
+        
+        .lang-switch {
+            transition: all 0.3s ease;
+        }
+        
+        .lang-switch:hover {
+            transform: scale(1.1);
+        }
+        
+        .lang-switch:active {
+            animation: click 0.3s ease;
+        }
+        
+        @keyframes click {
+            0% { transform: scale(1.1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1.1); }
+        }
+        
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .btn-animate {
+            opacity: 0;
+            animation: slideIn 1s ease-out forwards;
+            animation-delay: 1.2s;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .arrow-animate {
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
+            animation-delay: 2s;
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+        
+        .move-up-down {
+            animation: moveUpDown 2s ease-in-out infinite;
+        }
+        
+        @keyframes moveUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .logo-animate {
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
+            animation-delay: 0.2s;
+        }
+        
+        .subtitle-animate {
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
+            animation-delay: 0.8s;
+        }
+        
+        .subtitle-fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease-in forwards;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <div class="logo-container">
-                <img src="https://korani.eu/img/logoar.png" alt="شعار الموقع" class="logo">
-                <div class="class-name" id="className">الفصل: غير محدد</div>
-            </div>
-            <div class="header-controls">
-                <button class="language-switcher" id="languageSwitcher">Deutsch</button>
-            </div>
-        </header>
-        
-        <div class="main-content">
-            <form id="attendanceForm">
-                <div class="form-group">
-                    <label for="firstName" id="firstNameLabel">الاسم الأول</label>
-                    <input type="text" id="firstName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="lastName" id="lastNameLabel">الاسم الثاني</label>
-                    <input type="text" id="lastName" required>
-                </div>
-                
-                <div class="buttons-container">
-                    <button type="submit" class="btn btn-attendance" id="submitBtn">تسجيل الحضور</button>
-                    <button type="button" class="btn btn-absence" id="absenceBtn">تسجيل غياب</button>
-                </div>
-            </form>
+<body class="text-white">
+    <!-- Canvas for gradient -->
+    <canvas id="gradient-canvas"></canvas>
+
+    <!-- اللغة -->
+    <div class="fixed top-6 left-6 z-10">
+        <button id="langToggle" class="lang-switch glass-effect px-4 py-2 rounded-xl font-bold">
+            <span class="lang-ar">DE</span>
+            <span class="lang-de hidden">AR</span>
+        </button>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="content-container">
+        <div class="text-center px-4">
+            <img src="https://korani.eu/img/logoar.png" alt="Logo" class="h-20 md:h-24 mx-auto mb-8 logo-animate">
             
-            <div class="attendance-list">
-                <h2 id="attendanceListTitle">سجل الحضور والغياب</h2>
-                <ul id="attendanceRecords">
-                    <li class="empty-state" id="emptyState">لم يتم تسجيل أي حضور أو غياب بعد</li>
-                </ul>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 lang-ar typewriter typewriter-ar">
+                نظام تسجيل حضور جديد
+            </h1>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 lang-de hidden typewriter typewriter-de">
+                Neues Anwesenheitssystem
+            </h1>
+            
+            <p class="text-xl md:text-2xl mb-8 opacity-90 lang-ar subtitle-fade-in">
+                انطلق نحو تجربة أفضل لتسجيل الحضور
+            </p>
+            <p class="text-xl md:text-2xl mb-8 opacity-90 lang-de hidden subtitle-fade-in">
+                Starte in eine bessere Anwesenheitserfahrung
+            </p>
+            
+            <a href="https://korani.netlify.app" 
+               class="btn-glow bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-2xl text-lg inline-flex items-center gap-3 btn-animate">
+                <span class="lang-ar">اذهب للنظام الجديد</span>
+                <span class="lang-de hidden">Zum neuen System</span>
+            </a>
+            
+            <!-- سهم التمرير -->
+            <div class="mt-8 arrow-animate">
+                <svg class="w-8 h-8 mx-auto text-white opacity-70 move-up-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                </svg>
             </div>
         </div>
     </div>
 
-    <!-- نافذة تسجيل الغياب -->
-    <div class="modal" id="absenceModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">تسجيل غياب طالب</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
-            </div>
-            <form id="absenceForm">
-                <div class="form-group">
-                    <label for="absenceFirstName" id="absenceFirstNameLabel">الاسم الأول</label>
-                    <input type="text" id="absenceFirstName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="absenceLastName" id="absenceLastNameLabel">الاسم الثاني</label>
-                    <input type="text" id="absenceLastName" required>
-                </div>
-                
-                <div class="buttons-container">
-                    <button type="submit" class="btn btn-absence" id="absenceSubmitBtn">تسجيل الغياب</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <script>
+        // تهيئة الصفحة بعد التحميل
+        window.addEventListener('load', function() {
+            // إخفاء المؤشر بعد انتهاء الكتابة
+            setTimeout(() => {
+                const typewriterElements = document.querySelectorAll('.typewriter');
+                typewriterElements.forEach(el => {
+                    el.style.animation = 'none';
+                    el.style.border = 'none';
+                });
+            }, 2500);
+            
+            // إظهار النص الفرعي بعد تأخير
+            setTimeout(() => {
+                const subtitleElements = document.querySelectorAll('.subtitle-fade-in');
+                subtitleElements.forEach(el => {
+                    el.style.animationDelay = '0.8s';
+                    el.classList.add('fade-in');
+                });
+            }, 100);
+        });
 
-<script>
-    // إعدادات JSONBin.io - استخدم معلوماتك هنا
-    const JSONBIN_CONFIG = {
-        BIN_ID: '68ebd1e4d0ea881f409f33c0',
-        API_KEY: '$2a$10$j2RFt5cgHHSkHvUzwqZV.eoHlA3A.8C.rt4IWH/XDTwyN7Pt1Fm9S',
-        BASE_URL: 'https://api.jsonbin.io/v3/b'
-    };
-    
-    const classes = {
-        1: "معلمة جنين - الاثنين", 2: "معلمة احلام - الاثنين", 3: "معلمة ايات العدوي - الاثنين",
-        4: "معلمة سمر - الاثنين", 5: "معلمة الاء زيادة - الاثنين", 6: "معلمة رانبا - الاثنين",
-        7: "معلم عبادة الاشقر - الاثنين", 8: "معلمة اسماء السلطان - الاثنين", 9: "معلمة سناء - الاثنين",
-        10: "معلمة فوزية - الخميس", 11: "معلمة ام عمر - الخميس", 12: "معلمة براء - الخميس",
-        13: "معلمة ناريمان صالح - الخميس", 14: "معلم عثمان الخطيب - الخميس", 15: "معلمة .ام براء - الخميس",
-        16: "معلمة مروة - الخميس", 17: "معلمة روان - الخميس", 18: "معلمة سمر - الخميس", 19: "معلمة سناء - الخميس",
-        20: "معلمة شيماء - الجمعة", 21: "معلمة دانا - الجمعة", 22: "محمود دغميس - الجمعة",
-        23: "معلمة أمامة أبو حطب - الجمعة", 24: "معلمة بسمة - الجمعة", 25: "معلمة ماريا - الجمعة",
-        26: "احمد الشرقاوي - الجمعة", 27: "معلم احمد الشرقاوي - الاحد", 28: "معلمة يسرا السلطان - الاحد",
-        29: "الشيخ عمار - الاحد", 30: "المعلمة ريعان عسقول - الخميس", 31: "الشيخ اسامة السلطان - الاحد",
-        32: "الشيخ أمين - الاحد", 33: "المعلمة سناء - الاربعاء", 34: "المعلمة سناء - الاحد",
-        35: "صف النورانية الاول - الخميس", 36: "صف النورانية الثاني - الخميس"
-    };
-    
-    // متغيرات النظام
-    let refreshInterval;
-    let currentLang = 'ar';
-    let currentClass = 'غير محدد';
-    let allAttendanceData = [];
+        // WebGL Gradient Code
+        function normalizeColor(hexCode) {
+            return [(hexCode >> 16 & 255) / 255, (hexCode >> 8 & 255) / 255, (255 & hexCode) / 255];
+        }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // العناصر الرئيسية
-        const form = document.getElementById('attendanceForm');
-        const firstNameInput = document.getElementById('firstName');
-        const lastNameInput = document.getElementById('lastName');
-        const attendanceRecords = document.getElementById('attendanceRecords');
-        const languageSwitcher = document.getElementById('languageSwitcher');
-        const emptyState = document.getElementById('emptyState');
-        const absenceBtn = document.getElementById('absenceBtn');
-        const absenceModal = document.getElementById('absenceModal');
-        const modalClose = document.getElementById('modalClose');
-        const absenceForm = document.getElementById('absenceForm');
-        const absenceFirstName = document.getElementById('absenceFirstName');
-        const absenceLastName = document.getElementById('absenceLastName');
-        const classNameElement = document.getElementById('className');
-        
-        // الحصول على رقم الفصل من الرابط
-        const urlParams = new URLSearchParams(window.location.search);
-        const classNumber = parseInt(urlParams.get('class'));
-        
-        if (classNumber && classes[classNumber]) {
-            currentClass = classes[classNumber];
-        } else if (classNumber) {
-            currentClass = `فصل ${classNumber}`;
-        }
-        
-        classNameElement.textContent = `الفصل: ${currentClass}`;
-        
-        // النصوص باللغتين
-        const texts = {
-            ar: {
-                firstNameLabel: "الاسم الأول", 
-                lastNameLabel: "الاسم الثاني",
-                submitBtn: "تسجيل الحضور", 
-                absenceBtn: "تسجيل غياب",
-                attendanceListTitle: "سجل الحضور والغياب", 
-                languageBtn: "Deutsch",
-                emptyState: "لم يتم تسجيل أي حضور أو غياب بعد",
-                successMessage: "تم تسجيل حضور {name} بنجاح",
-                absenceSuccessMessage: "تم تسجيل غياب {name} بنجاح",
-                errorMessage: "يرجى ملء جميع الحقول",
-                modalTitle: "تسجيل غياب طالب",
-                className: `الفصل: ${currentClass}`,
-                present: "حضور",
-                absent: "غياب",
-                loading: "جاري التحميل...",
-                saving: "جاري الحفظ...",
-                errorLoading: "خطأ في تحميل البيانات",
-                errorSaving: "خطأ في حفظ البيانات"
-            },
-            de: {
-                firstNameLabel: "Vorname", 
-                lastNameLabel: "Nachname",
-                submitBtn: "Anwesenheit registrieren", 
-                absenceBtn: "Abwesenheit registrieren",
-                attendanceListTitle: "Anwesenheits- und Abwesenheitsliste", 
-                languageBtn: "العربية",
-                emptyState: "Noch keine Anwesenheit oder Abwesenheit registriert",
-                successMessage: "Anwesenheit von {name} erfolgreich registriert",
-                absenceSuccessMessage: "Abwesenheit von {name} erfolgreich registriert",
-                errorMessage: "Bitte füllen Sie alle Felder aus",
-                modalTitle: "Abwesenheit eines Schülers registrieren",
-                className: `Klasse: ${currentClass}`,
-                present: "Anwesend",
-                absent: "Abwesend",
-                loading: "Lädt...",
-                saving: "Wird gespeichert...",
-                errorLoading: "Fehler beim Laden der Daten",
-                errorSaving: "Fehler beim Speichern der Daten"
-            }
-        };
-        
-        // التحقق من وجود الكوكي وتعيين القيمة للطالب الأساسي
-        const savedStudentName = getCookie('studentName');
-        if (savedStudentName) {
-            const names = savedStudentName.split(' ');
-            firstNameInput.value = names[0] || '';
-            lastNameInput.value = names[1] || '';
-        }
-        
-        // جلب بيانات الحضور عند تحميل الصفحة
-        fetchAttendance();
-        
-        // بدء التحديث التلقائي كل 10 ثوانٍ
-        startAutoRefresh();
-        
-        // تغيير اللغة
-        languageSwitcher.addEventListener('click', function() {
-            currentLang = currentLang === 'ar' ? 'de' : 'ar';
-            updateLanguage(currentLang);
-            updateAttendanceDisplay(); // تحديث العرض باللغة الجديدة
-        });
-        
-        function updateLanguage(lang) {
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            
-            document.getElementById('firstNameLabel').textContent = texts[lang].firstNameLabel;
-            document.getElementById('lastNameLabel').textContent = texts[lang].lastNameLabel;
-            document.getElementById('submitBtn').textContent = texts[lang].submitBtn;
-            document.getElementById('absenceBtn').textContent = texts[lang].absenceBtn;
-            document.getElementById('attendanceListTitle').textContent = texts[lang].attendanceListTitle;
-            document.getElementById('modalTitle').textContent = texts[lang].modalTitle;
-            document.getElementById('absenceFirstNameLabel').textContent = texts[lang].firstNameLabel;
-            document.getElementById('absenceLastNameLabel').textContent = texts[lang].lastNameLabel;
-            document.getElementById('absenceSubmitBtn').textContent = texts[lang].absenceBtn;
-            document.getElementById('className').textContent = texts[lang].className;
-            languageSwitcher.textContent = texts[lang].languageBtn;
-            emptyState.textContent = texts[lang].emptyState;
-        }
-        
-        // بدء التحديث التلقائي
-// بدء التحديث التلقائي كل دقيقتين (120,000 ميلي ثانية)
-function startAutoRefresh() {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-    }
-    refreshInterval = setInterval(fetchAttendance, 120000); // 120,000 ميلي ثانية = 2 دقيقة
-    console.log('Auto-refresh started: updating every 2 minutes');
-}
-        
-        // فتح نافذة تسجيل الغياب
-        absenceBtn.addEventListener('click', function() {
-            absenceModal.style.display = 'flex';
-        });
-        
-        // إغلاق نافذة تسجيل الغياب
-        modalClose.addEventListener('click', function() {
-            absenceModal.style.display = 'none';
-            absenceForm.reset();
-        });
-        
-        // إغلاق النافذة عند النقر خارجها
-        window.addEventListener('click', function(event) {
-            if (event.target === absenceModal) {
-                absenceModal.style.display = 'none';
-                absenceForm.reset();
-            }
-        });
-        
-        // تسجيل الحضور للطالب الأساسي
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            registerAttendance(firstNameInput.value.trim(), lastNameInput.value.trim(), true, 'حضور');
-        });
-        
-        // تسجيل الغياب للطالب الآخر
-        absenceForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            registerAttendance(absenceFirstName.value.trim(), absenceLastName.value.trim(), false, 'غياب');
-            absenceModal.style.display = 'none';
-            absenceForm.reset();
-        });
-        
-        // وظيفة تسجيل الحضور/الغياب
-        async function registerAttendance(firstName, lastName, isMainStudent, attendanceType) {
-            if (firstName && lastName) {
-                // حفظ بيانات الطالب الأساسي في الكوكي
-                if (isMainStudent && attendanceType === 'حضور') {
-                    setCookie('studentName', `${firstName} ${lastName}`, 30);
-                }
+        class MiniGl {
+            constructor(canvas, width, height, debug = false) {
+                const _miniGl = this;
+                _miniGl.canvas = canvas;
+                _miniGl.gl = _miniGl.canvas.getContext("webgl", { antialias: true });
+                _miniGl.meshes = [];
+                const context = _miniGl.gl;
                 
-                const now = new Date();
-                const timeString = now.toLocaleString();
+                width && height && this.setSize(width, height);
                 
-                showMessage(texts[currentLang].saving, 'loading');
-                
-                try {
-                    // إنشاء السجل الجديد
-                    const newRecord = {
-                        first: firstName,
-                        second: lastName,
-                        class: currentClass,
-                        time: timeString,
-                        attendance: attendanceType,
-                        timestamp: now.getTime()
-                    };
-                    
-                    // جلب البيانات الحالية أولاً
-                    await fetchAttendance();
-                    
-                    // إضافة السجل إلى البيانات المحلية
-                    allAttendanceData.push(newRecord);
-                    
-                    // حفظ البيانات في JSONBin
-                    await saveToJSONBin(allAttendanceData);
-                    
-                    // إخفاء رسالة عدم وجود بيانات
-                    if (emptyState.style.display !== 'none') {
-                        emptyState.style.display = 'none';
-                    }
-                    
-                    // تحديث العرض المحلي
-                    updateAttendanceDisplay();
-                    
-                    // مسح الحقول للطالب الأساسي فقط
-                    if (isMainStudent && attendanceType === 'حضور') {
-                        lastNameInput.value = '';
-                    }
-                    
-                    // عرض رسالة نجاح
-                    const successMessage = attendanceType === 'حضور' ? 
-                        texts[currentLang].successMessage : texts[currentLang].absenceSuccessMessage;
-                    showMessage(successMessage.replace('{name}', `${firstName} ${lastName}`), 'success');
-                    
-                } catch (error) {
-                    console.error('Error:', error);
-                    showMessage(currentLang === 'ar' ? 
-                        (attendanceType === 'حضور' ? 'حدث خطأ في تسجيل الحضور' : 'حدث خطأ في تسجيل الغياب') :
-                        (attendanceType === 'حضور' ? 'Fehler bei der Anwesenheitsregistrierung' : 'Fehler bei der Abwesenheitsregistrierung'), 'error');
-                }
-            } else {
-                showMessage(texts[currentLang].errorMessage, 'error');
-            }
-        }
-        
-        // وظيفة لحفظ البيانات في JSONBin
-        async function saveToJSONBin(data) {
-            const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': JSONBIN_CONFIG.API_KEY
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            return await response.json();
-        }
-        
-        // وظيفة لجلب البيانات من JSONBin
-        async function fetchAttendance() {
-            try {
-                showMessage(texts[currentLang].loading, 'loading');
-                
-                const response = await fetch(`${JSONBIN_CONFIG.BASE_URL}/${JSONBIN_CONFIG.BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': JSONBIN_CONFIG.API_KEY
+                Object.defineProperties(_miniGl, {
+                    Material: {
+                        enumerable: false,
+                        value: class {
+                            constructor(vertexShaders, fragments, uniforms = {}) {
+                                const material = this;
+                                function getShaderByType(type, source) {
+                                    const shader = context.createShader(type);
+                                    context.shaderSource(shader, source);
+                                    context.compileShader(shader);
+                                    context.getShaderParameter(shader, context.COMPILE_STATUS) || console.error(context.getShaderInfoLog(shader));
+                                    return shader;
+                                }
+                                
+                                function getUniformVariableDeclarations(uniforms, type) {
+                                    return Object.entries(uniforms).map(([uniform, value]) => value.getDeclaration(uniform, type)).join("\n");
+                                }
+                                
+                                material.uniforms = uniforms;
+                                material.uniformInstances = [];
+                                const prefix = "\n              precision highp float;\n            ";
+                                material.vertexSource = `\n              ${prefix}\n              attribute vec4 position;\n              attribute vec2 uv;\n              attribute vec2 uvNorm;\n              ${getUniformVariableDeclarations(_miniGl.commonUniforms, "vertex")}\n              ${getUniformVariableDeclarations(uniforms, "vertex")}\n              ${vertexShaders}\n            `;
+                                material.Source = `\n              ${prefix}\n              ${getUniformVariableDeclarations(_miniGl.commonUniforms, "fragment")}\n              ${getUniformVariableDeclarations(uniforms, "fragment")}\n              ${fragments}\n            `;
+                                material.vertexShader = getShaderByType(context.VERTEX_SHADER, material.vertexSource);
+                                material.fragmentShader = getShaderByType(context.FRAGMENT_SHADER, material.Source);
+                                material.program = context.createProgram();
+                                context.attachShader(material.program, material.vertexShader);
+                                context.attachShader(material.program, material.fragmentShader);
+                                context.linkProgram(material.program);
+                                context.getProgramParameter(material.program, context.LINK_STATUS) || console.error(context.getProgramInfoLog(material.program));
+                                context.useProgram(material.program);
+                                material.attachUniforms(void 0, _miniGl.commonUniforms);
+                                material.attachUniforms(void 0, material.uniforms);
+                            }
+                            
+                            attachUniforms(name, uniforms) {
+                                const material = this;
+                                void 0 === name ? Object.entries(uniforms).forEach(([name, uniform]) => {
+                                    material.attachUniforms(name, uniform);
+                                }) : "array" == uniforms.type ? uniforms.value.forEach((uniform, i) => material.attachUniforms(`${name}[${i}]`, uniform)) : "struct" == uniforms.type ? Object.entries(uniforms.value).forEach(([uniform, i]) => material.attachUniforms(`${name}.${uniform}`, i)) : material.uniformInstances.push({
+                                    uniform: uniforms,
+                                    location: context.getUniformLocation(material.program, name)
+                                });
+                            }
+                        }
+                    },
+                    Uniform: {
+                        enumerable: !1,
+                        value: class {
+                            constructor(e) {
+                                this.type = "float";
+                                Object.assign(this, e);
+                                this.typeFn = {
+                                    float: "1f",
+                                    int: "1i",
+                                    vec2: "2fv",
+                                    vec3: "3fv",
+                                    vec4: "4fv",
+                                    mat4: "Matrix4fv"
+                                }[this.type] || "1f";
+                                this.update();
+                            }
+                            update(value) {
+                                void 0 !== this.value && context[`uniform${this.typeFn}`](value, 0 === this.typeFn.indexOf("Matrix") ? this.transpose : this.value, 0 === this.typeFn.indexOf("Matrix") ? this.value : null);
+                            }
+                            
+                            getDeclaration(name, type, length) {
+                                const uniform = this;
+                                if (uniform.excludeFrom !== type) {
+                                    if ("array" === uniform.type) return uniform.value[0].getDeclaration(name, type, uniform.value.length) + `\nconst int ${name}_length = ${uniform.value.length};`;
+                                    if ("struct" === uniform.type) {
+                                        let name_no_prefix = name.replace("u_", "");
+                                        name_no_prefix = name_no_prefix.charAt(0).toUpperCase() + name_no_prefix.slice(1);
+                                        return `uniform struct ${name_no_prefix} 
+                                {\n` + Object.entries(uniform.value).map(([name, uniform]) => uniform.getDeclaration(name, type).replace(/^uniform/, "")).join("") + `\n} ${name}${length > 0 ? `[${length}]` : ""};`;
+                                    }
+                                    return `uniform ${uniform.type} ${name}${length > 0 ? `[${length}]` : ""};`;
+                                }
+                            }
+                        }
+                    },
+                    PlaneGeometry: {
+                        enumerable: !1,
+                        value: class {
+                            constructor(width, height, n, i, orientation) {
+                                context.createBuffer();
+                                this.attributes = {
+                                    position: new _miniGl.Attribute({
+                                        target: context.ARRAY_BUFFER,
+                                        size: 3
+                                    }),
+                                    uv: new _miniGl.Attribute({
+                                        target: context.ARRAY_BUFFER,
+                                        size: 2
+                                    }),
+                                    uvNorm: new _miniGl.Attribute({
+                                        target: context.ARRAY_BUFFER,
+                                        size: 2
+                                    }),
+                                    index: new _miniGl.Attribute({
+                                        target: context.ELEMENT_ARRAY_BUFFER,
+                                        size: 3,
+                                        type: context.UNSIGNED_SHORT
+                                    })
+                                };
+                                this.setTopology(n, i);
+                                this.setSize(width, height, orientation);
+                            }
+                            setTopology(e = 1, t = 1) {
+                                const n = this;
+                                n.xSegCount = e;
+                                n.ySegCount = t;
+                                n.vertexCount = (n.xSegCount + 1) * (n.ySegCount + 1);
+                                n.quadCount = n.xSegCount * n.ySegCount * 2;
+                                n.attributes.uv.values = new Float32Array(2 * n.vertexCount);
+                                n.attributes.uvNorm.values = new Float32Array(2 * n.vertexCount);
+                                n.attributes.index.values = new Uint16Array(3 * n.quadCount);
+                                
+                                for (let e = 0; e <= n.ySegCount; e++) {
+                                    for (let t = 0; t <= n.xSegCount; t++) {
+                                        const i = e * (n.xSegCount + 1) + t;
+                                        n.attributes.uv.values[2 * i] = t / n.xSegCount;
+                                        n.attributes.uv.values[2 * i + 1] = 1 - e / n.ySegCount;
+                                        n.attributes.uvNorm.values[2 * i] = t / n.xSegCount * 2 - 1;
+                                        n.attributes.uvNorm.values[2 * i + 1] = 1 - e / n.ySegCount * 2;
+                                        
+                                        if (t < n.xSegCount && e < n.ySegCount) {
+                                            const s = e * n.xSegCount + t;
+                                            n.attributes.index.values[6 * s] = i;
+                                            n.attributes.index.values[6 * s + 1] = i + 1 + n.xSegCount;
+                                            n.attributes.index.values[6 * s + 2] = i + 1;
+                                            n.attributes.index.values[6 * s + 3] = i + 1;
+                                            n.attributes.index.values[6 * s + 4] = i + 1 + n.xSegCount;
+                                            n.attributes.index.values[6 * s + 5] = i + 2 + n.xSegCount;
+                                        }
+                                    }
+                                }
+                                n.attributes.uv.update();
+                                n.attributes.uvNorm.update();
+                                n.attributes.index.update();
+                            }
+                            setSize(width = 1, height = 1, orientation = "xz") {
+                                const geometry = this;
+                                geometry.width = width;
+                                geometry.height = height;
+                                geometry.orientation = orientation;
+                                
+                                geometry.attributes.position.values && geometry.attributes.position.values.length === 3 * geometry.vertexCount || (geometry.attributes.position.values = new Float32Array(3 * geometry.vertexCount));
+                                
+                                const o = width / -2;
+                                const r = height / -2;
+                                const segment_width = width / geometry.xSegCount;
+                                const segment_height = height / geometry.ySegCount;
+                                
+                                for (let yIndex = 0; yIndex <= geometry.ySegCount; yIndex++) {
+                                    const t = r + yIndex * segment_height;
+                                    for (let xIndex = 0; xIndex <= geometry.xSegCount; xIndex++) {
+                                        const r = o + xIndex * segment_width;
+                                        const l = yIndex * (geometry.xSegCount + 1) + xIndex;
+                                        geometry.attributes.position.values[3 * l + "xyz".indexOf(orientation[0])] = r;
+                                        geometry.attributes.position.values[3 * l + "xyz".indexOf(orientation[1])] = -t;
+                                    }
+                                }
+                                geometry.attributes.position.update();
+                            }
+                        }
+                    },
+                    Mesh: {
+                        enumerable: !1,
+                        value: class {
+                            constructor(geometry, material) {
+                                const mesh = this;
+                                mesh.geometry = geometry;
+                                mesh.material = material;
+                                mesh.wireframe = !1;
+                                mesh.attributeInstances = [];
+                                
+                                Object.entries(mesh.geometry.attributes).forEach(([e, attribute]) => {
+                                    mesh.attributeInstances.push({
+                                        attribute: attribute,
+                                        location: attribute.attach(e, mesh.material.program)
+                                    });
+                                });
+                                
+                                _miniGl.meshes.push(mesh);
+                            }
+                            draw() {
+                                context.useProgram(this.material.program);
+                                this.material.uniformInstances.forEach(({ uniform: e, location: t }) => e.update(t));
+                                this.attributeInstances.forEach(({ attribute: e, location: t }) => e.use(t));
+                                context.drawElements(this.wireframe ? context.LINES : context.TRIANGLES, this.geometry.attributes.index.values.length, context.UNSIGNED_SHORT, 0);
+                            }
+                            remove() {
+                                _miniGl.meshes = _miniGl.meshes.filter(e => e != this);
+                            }
+                        }
+                    },
+                    Attribute: {
+                        enumerable: !1,
+                        value: class {
+                            constructor(e) {
+                                this.type = context.FLOAT;
+                                this.normalized = !1;
+                                this.buffer = context.createBuffer();
+                                Object.assign(this, e);
+                                this.update();
+                            }
+                            update() {
+                                void 0 !== this.values && (context.bindBuffer(this.target, this.buffer), context.bufferData(this.target, this.values, context.STATIC_DRAW));
+                            }
+                            attach(e, t) {
+                                const n = context.getAttribLocation(t, e);
+                                return this.target === context.ARRAY_BUFFER && (context.enableVertexAttribArray(n), context.vertexAttribPointer(n, this.size, this.type, this.normalized, 0, 0)), n;
+                            }
+                            use(e) {
+                                context.bindBuffer(this.target, this.buffer);
+                                this.target === context.ARRAY_BUFFER && (context.enableVertexAttribArray(e), context.vertexAttribPointer(e, this.size, this.type, this.normalized, 0, 0));
+                            }
+                        }
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                const a = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+                _miniGl.commonUniforms = {
+                    projectionMatrix: new _miniGl.Uniform({
+                        type: "mat4",
+                        value: a
+                    }),
+                    modelViewMatrix: new _miniGl.Uniform({
+                        type: "mat4",
+                        value: a
+                    }),
+                    resolution: new _miniGl.Uniform({
+                        type: "vec2",
+                        value: [1, 1]
+                    }),
+                    aspectRatio: new _miniGl.Uniform({
+                        type: "float",
+                        value: 1
+                    })
+                };
+            }
+            
+            setSize(e = 640, t = 480) {
+                this.width = e;
+                this.height = t;
+                this.canvas.width = e;
+                this.canvas.height = t;
+                this.gl.viewport(0, 0, e, t);
+                this.commonUniforms.resolution.value = [e, t];
+                this.commonUniforms.aspectRatio.value = e / t;
+            }
+            
+            setOrthographicCamera(e = 0, t = 0, n = 0, i = -2e3, s = 2e3) {
+                this.commonUniforms.projectionMatrix.value = [2 / this.width, 0, 0, 0, 0, 2 / this.height, 0, 0, 0, 0, 2 / (i - s), 0, e, t, n, 1];
+            }
+            
+            render() {
+                this.gl.clearColor(0, 0, 0, 0);
+                this.gl.clearDepth(1);
+                this.meshes.forEach(e => e.draw());
+            }
+        }
+
+        class Gradient {
+            constructor(...t) {
+                this.el = void 0;
+                this.cssVarRetries = 0;
+                this.maxCssVarRetries = 200;
+                this.angle = 0;
+                this.isLoadedClass = !1;
+                this.isScrolling = !1;
+                this.scrollingTimeout = void 0;
+                this.scrollingRefreshDelay = 200;
+                this.isIntersecting = !1;
+                this.shaderFiles = void 0;
+                this.vertexShader = void 0;
+                this.sectionColors = void 0;
+                this.computedCanvasStyle = void 0;
+                this.conf = void 0;
+                this.uniforms = void 0;
+                this.t = 1253106;
+                this.last = 0;
+                this.width = void 0;
+                this.minWidth = 1111;
+                this.height = 600;
+                this.xSegCount = void 0;
+                this.ySegCount = void 0;
+                this.mesh = void 0;
+                this.material = void 0;
+                this.geometry = void 0;
+                this.minigl = void 0;
+                this.scrollObserver = void 0;
+                this.amp = 320;
+                this.seed = 5;
+                this.freqX = 14e-5;
+                this.freqY = 29e-5;
+                this.freqDelta = 1e-5;
+                this.activeColors = [1, 1, 1, 1];
+                this.isMetaKey = !1;
+                this.isGradientLegendVisible = !1;
+                this.isMouseDown = !1;
+                
+                this.resize = () => {
+                    this.width = window.innerWidth;
+                    this.minigl.setSize(this.width, this.height);
+                    this.minigl.setOrthographicCamera();
+                    this.xSegCount = Math.ceil(this.width * this.conf.density[0]);
+                    this.ySegCount = Math.ceil(this.height * this.conf.density[1]);
+                    this.mesh.geometry.setTopology(this.xSegCount, this.ySegCount);
+                    this.mesh.geometry.setSize(this.width, this.height);
+                    this.mesh.material.uniforms.u_shadow_power.value = this.width < 600 ? 5 : 6;
+                };
+                
+                this.animate = e => {
+                    if (!this.shouldSkipFrame(e) || this.isMouseDown) {
+                        if (this.t += Math.min(e - this.last, 1e3 / 15), this.last = e, this.isMouseDown) {
+                            let e = 160;
+                            this.isMetaKey && (e = -160);
+                            this.t += e;
+                        }
+                        this.mesh.material.uniforms.u_time.value = this.t;
+                        this.minigl.render();
+                    }
+                    
+                    if (0 !== this.last && this.isStatic) return this.minigl.render(), void this.disconnect();
+                    (this.conf.playing || this.isMouseDown) && requestAnimationFrame(this.animate);
+                };
+                
+                this.initGradient = (selector) => {
+                    this.el = document.querySelector(selector);
+                    this.connect();
+                    return this;
+                };
+            }
+            
+            async connect() {
+                this.shaderFiles = {
+                    vertex: "varying vec3 v_color;\n\nvoid main() {\n  float time = u_time * u_global.noiseSpeed;\n\n  vec2 noiseCoord = resolution * uvNorm * u_global.noiseFreq;\n\n  vec2 st = 1. - uvNorm.xy;\n\n  //\n  // Tilting the plane\n  //\n\n  // Front-to-back tilt\n  float tilt = resolution.y / 2.0 * uvNorm.y;\n\n  // Left-to-right angle\n  float incline = resolution.x * uvNorm.x / 2.0 * u_vertDeform.incline;\n\n  // Up-down shift to offset incline\n  float offset = resolution.x / 2.0 * u_vertDeform.incline * mix(u_vertDeform.offsetBottom, u_vertDeform.offsetTop, uv.y);\n\n  //\n  // Vertex noise\n  //\n\n  float noise = snoise(vec3(\n    noiseCoord.x * u_vertDeform.noiseFreq.x + time * u_vertDeform.noiseFlow,\n    noiseCoord.y * u_vertDeform.noiseFreq.y,\n    time * u_vertDeform.noiseSpeed + u_vertDeform.noiseSeed\n  )) * u_vertDeform.noiseAmp;\n\n  // Fade noise to zero at edges\n  noise *= 1.0 - pow(abs(uvNorm.y), 2.0);\n\n  // Clamp to 0\n  noise = max(0.0, noise);\n\n  vec3 pos = vec3(\n    position.x,\n    position.y + tilt + incline + noise - offset,\n    position.z\n  );\n\n  //\n  // Vertex color, to be passed to fragment shader\n  //\n\n  if (u_active_colors[0] == 1.) {\n    v_color = u_baseColor;\n  }\n\n  for (int i = 0; i < u_waveLayers_length; i++) {\n    if (u_active_colors[i + 1] == 1.) {\n      WaveLayers layer = u_waveLayers[i];\n\n      float noise = smoothstep(\n        layer.noiseFloor,\n        layer.noiseCeil,\n        snoise(vec3(\n          noiseCoord.x * layer.noiseFreq.x + time * layer.noiseFlow,\n          noiseCoord.y * layer.noiseFreq.y,\n          time * layer.noiseSpeed + layer.noiseSeed\n        )) / 2.0 + 0.5\n      );\n\n      v_color = blendNormal(v_color, layer.color, pow(noise, 4.));\n    }\n  }\n\n  //\n  // Finish\n  //\n\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);\n}",
+                    noise: "//\n// Description : Array and textureless GLSL 2D/3D/4D simplex\n//               noise functions.\n//      Author : Ian McEwan, Ashima Arts.\n//  Maintainer : stegu\n//     Lastmod : 20110822 (ijm)\n//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n//               Distributed under the MIT License. See LICENSE file.\n//               https://github.com/ashima/webgl-noise\n//               https://github.com/stegu/webgl-noise\n//\n\nvec3 mod289(vec3 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 mod289(vec4 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 permute(vec4 x) {\n    return mod289(((x*34.0)+1.0)*x);\n}\n\nvec4 taylorInvSqrt(vec4 r)\n{\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nfloat snoise(vec3 v)\n{\n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n// First corner\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n// Other corners\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  //   x0 = x0 - 0.0 + 0.0 * C.xxx;\n  //   x1 = x0 - i1  + 1.0 * C.xxx;\n  //   x2 = x0 - i2  + 2.0 * C.xxx;\n  //   x3 = x0 - 1.0 + 3.0 * C.xxx;\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n// Permutations\n  i = mod289(i);\n  vec4 p = permute( permute( permute(\n            i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n          + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))\n          + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n// Gradients: 7x7 points over a square, mapped onto an octahedron.\n// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;\n  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n//Normalise gradients\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n// Mix final noise value\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),\n                                dot(p2,x2), dot(p3,x3) ) );\n}",
+                    blend: "//\n// https://github.com/jamieowen/glsl-blend\n//\n\n// Normal\n\nvec3 blendNormal(vec3 base, vec3 blend) {\n\treturn blend;\n}\n\nvec3 blendNormal(vec3 base, vec3 blend, float opacity) {\n\treturn (blendNormal(base, blend) * opacity + base * (1.0 - opacity));\n}",
+                    fragment: "varying vec3 v_color;\n\nvoid main() {\n  vec3 color = v_color;\n  if (u_darken_top == 1.0) {\n    vec2 st = gl_FragCoord.xy/resolution.xy;\n    color.g -= pow(st.y + sin(-12.0) * st.x, u_shadow_power) * 0.4;\n  }\n  gl_FragColor = vec4(color, 1.0);\n}"
+                };
+                
+                this.conf = {
+                    presetName: "",
+                    wireframe: false,
+                    density: [.06, .16],
+                    zoom: 1,
+                    rotation: 0,
+                    playing: true
+                };
+                
+                document.querySelectorAll("canvas").length < 1 ? console.log("DID NOT LOAD HERO STRIPE CANVAS") : (
+                    this.minigl = new MiniGl(this.el, null, null, !0),
+                    requestAnimationFrame(() => {
+                        this.el && (this.computedCanvasStyle = getComputedStyle(this.el), this.waitForCssVars());
+                    })
+                );
+            }
+            
+            disconnect() {
+                window.removeEventListener("resize", this.resize);
+            }
+            
+            initMaterial() {
+                this.uniforms = {
+                    u_time: new this.minigl.Uniform({
+                        value: 0
+                    }),
+                    u_shadow_power: new this.minigl.Uniform({
+                        value: 5
+                    }),
+                    u_darken_top: new this.minigl.Uniform({
+                        value: "" === this.el.dataset.jsDarkenTop ? 1 : 0
+                    }),
+                    u_active_colors: new this.minigl.Uniform({
+                        value: this.activeColors,
+                        type: "vec4"
+                    }),
+                    u_global: new this.minigl.Uniform({
+                        value: {
+                            noiseFreq: new this.minigl.Uniform({
+                                value: [this.freqX, this.freqY],
+                                type: "vec2"
+                            }),
+                            noiseSpeed: new this.minigl.Uniform({
+                                value: 5e-6
+                            })
+                        },
+                        type: "struct"
+                    }),
+                    u_vertDeform: new this.minigl.Uniform({
+                        value: {
+                            incline: new this.minigl.Uniform({
+                                value: Math.sin(this.angle) / Math.cos(this.angle)
+                            }),
+                            offsetTop: new this.minigl.Uniform({
+                                value: -.5
+                            }),
+                            offsetBottom: new this.minigl.Uniform({
+                                value: -.5
+                            }),
+                            noiseFreq: new this.minigl.Uniform({
+                                value: [3, 4],
+                                type: "vec2"
+                            }),
+                            noiseAmp: new this.minigl.Uniform({
+                                value: this.amp
+                            }),
+                            noiseSpeed: new this.minigl.Uniform({
+                                value: 10
+                            }),
+                            noiseFlow: new this.minigl.Uniform({
+                                value: 3
+                            }),
+                            noiseSeed: new this.minigl.Uniform({
+                                value: this.seed
+                            })
+                        },
+                        type: "struct",
+                        excludeFrom: "fragment"
+                    }),
+                    u_baseColor: new this.minigl.Uniform({
+                        value: this.sectionColors[0],
+                        type: "vec3",
+                        excludeFrom: "fragment"
+                    }),
+                    u_waveLayers: new this.minigl.Uniform({
+                        value: [],
+                        excludeFrom: "fragment",
+                        type: "array"
+                    })
+                };
+                
+                for (let e = 1; e < this.sectionColors.length; e += 1) {
+                    this.uniforms.u_waveLayers.value.push(new this.minigl.Uniform({
+                        value: {
+                            color: new this.minigl.Uniform({
+                                value: this.sectionColors[e],
+                                type: "vec3"
+                            }),
+                            noiseFreq: new this.minigl.Uniform({
+                                value: [2 + e / this.sectionColors.length, 3 + e / this.sectionColors.length],
+                                type: "vec2"
+                            }),
+                            noiseSpeed: new this.minigl.Uniform({
+                                value: 11 + .3 * e
+                            }),
+                            noiseFlow: new this.minigl.Uniform({
+                                value: 6.5 + .3 * e
+                            }),
+                            noiseSeed: new this.minigl.Uniform({
+                                value: this.seed + 10 * e
+                            }),
+                            noiseFloor: new this.minigl.Uniform({
+                                value: .1
+                            }),
+                            noiseCeil: new this.minigl.Uniform({
+                                value: .63 + .07 * e
+                            })
+                        },
+                        type: "struct"
+                    }));
                 }
                 
-                const result = await response.json();
-                allAttendanceData = result.record || [];
-                
-                processAttendanceData(allAttendanceData);
-                
-            } catch (error) {
-                console.error('Error fetching attendance data:', error);
-                showLoadError();
+                this.vertexShader = [this.shaderFiles.noise, this.shaderFiles.blend, this.shaderFiles.vertex].join("\n\n");
+                return new this.minigl.Material(this.vertexShader, this.shaderFiles.fragment, this.uniforms);
             }
-        }
-        
-        function processAttendanceData(data) {
-            console.log('Processing data for class:', currentClass);
             
-            // تصفية البيانات للفصل الحالي فقط
-            const classData = data.filter(item => {
-                return item.class === currentClass;
-            });
+            initMesh() {
+                this.material = this.initMaterial();
+                this.geometry = new this.minigl.PlaneGeometry;
+                this.mesh = new this.minigl.Mesh(this.geometry, this.material);
+            }
             
-            console.log('Filtered data for class:', classData);
+            shouldSkipFrame(e) {
+                return !!window.document.hidden || (!this.conf.playing || (parseInt(e, 10) % 2 == 0 || void 0));
+            }
             
-            if (classData.length > 0) {
-                // إخفاء رسالة عدم وجود بيانات
-                if (emptyState.style.display !== 'none') {
-                    emptyState.style.display = 'none';
+            init() {
+                this.initGradientColors();
+                this.initMesh();
+                this.resize();
+                requestAnimationFrame(this.animate);
+                window.addEventListener("resize", this.resize);
+            }
+            
+            waitForCssVars() {
+                if (this.computedCanvasStyle && -1 !== this.computedCanvasStyle.getPropertyValue("--gradient-color-1").indexOf("#")) {
+                    this.init();
+                } else {
+                    if (this.cssVarRetries += 1, this.cssVarRetries > this.maxCssVarRetries) {
+                        return this.sectionColors = [16711680, 16711680, 16711935, 65280, 255], void this.init();
+                    }
+                    requestAnimationFrame(() => this.waitForCssVars());
                 }
-                
-                updateAttendanceDisplay(classData);
-            } else {
-                // عرض رسالة عدم وجود بيانات
-                emptyState.style.display = 'block';
-                console.log('No data found for class:', currentClass);
+            }
+            
+            initGradientColors() {
+                this.sectionColors = ["--gradient-color-1", "--gradient-color-2", "--gradient-color-3", "--gradient-color-4"].map(cssPropertyName => {
+                    let hex = this.computedCanvasStyle.getPropertyValue(cssPropertyName).trim();
+                    if (4 === hex.length) {
+                        const hexTemp = hex.substr(1).split("").map(hexTemp => hexTemp + hexTemp).join("");
+                        hex = `#${hexTemp}`;
+                    }
+                    return hex && `0x${hex.substr(1)}`;
+                }).filter(Boolean).map(normalizeColor);
             }
         }
-        
-        // وظيفة لتحديث العرض المحلي
-        function updateAttendanceDisplay(classData = null) {
-            const dataToDisplay = classData || allAttendanceData.filter(item => item.class === currentClass);
+
+        // Initialize the gradient
+        var gradient = new Gradient();
+        gradient.initGradient("#gradient-canvas");
+
+        // تبديل اللغة مع تأثيرات
+        const langToggle = document.getElementById('langToggle');
+        let currentLang = 'ar';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const isArabic = lang === 'ar';
             
-            // مسح القائمة الحالية
-            attendanceRecords.innerHTML = '';
+            // إخفاء العناصر الحالية بتأثير
+            const contentElements = document.querySelectorAll('.logo-animate, .subtitle-fade-in, .btn-animate, .arrow-animate');
+            const typewriterElements = document.querySelectorAll('.typewriter');
             
-            if (dataToDisplay.length === 0) {
-                emptyState.style.display = 'block';
-                return;
-            }
-            
-            // إضافة البيانات إلى القائمة
-            dataToDisplay.forEach(student => {
-                const listItem = document.createElement('li');
-                const attendanceType = student.attendance === 'غياب' ? 'غياب' : 'حضور';
-                listItem.className = attendanceType === 'حضور' ? 'attendance-item' : 'absence-item';
-                listItem.innerHTML = `
-                    <div>
-                        <span class="student-name">${student.first} ${student.second}</span>
-                        <span class="attendance-status ${attendanceType === 'حضور' ? 'status-present' : 'status-absent'}">
-                            ${attendanceType === 'حضور' ? texts[currentLang].present : texts[currentLang].absent}
-                        </span>
-                    </div>
-                    <span class="timestamp">${student.time}</span>
-                `;
-                attendanceRecords.appendChild(listItem);
-            });
-        }
-        
-        function showLoadError() {
-            if (attendanceRecords.children.length === 0 || 
-                (attendanceRecords.children.length === 1 && 
-                 attendanceRecords.children[0].classList.contains('empty-state'))) {
-                emptyState.textContent = texts[currentLang].errorLoading;
-                emptyState.style.display = 'block';
-            }
-            showMessage(texts[currentLang].errorLoading, 'error');
-        }
-        
-        // وظيفة لعرض الرسائل
-        function showMessage(message, type) {
-            // إزالة أي رسالة سابقة
-            const existingMessage = document.querySelector('.message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-            
-            // إنشاء رسالة جديدة
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${type}`;
-            messageElement.textContent = message;
-            
-            // إضافة زر الإغلاق
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-btn';
-            closeBtn.innerHTML = '&times;';
-            closeBtn.addEventListener('click', function() {
-                messageElement.remove();
+            contentElements.forEach(el => {
+                el.classList.remove('fade-in', 'btn-animate', 'arrow-animate', 'logo-animate', 'subtitle-fade-in');
+                el.classList.add('fade-out');
             });
             
-            messageElement.appendChild(closeBtn);
-            document.body.appendChild(messageElement);
+            typewriterElements.forEach(el => {
+                el.classList.remove('typewriter', 'typewriter-ar', 'typewriter-de');
+                el.style.animation = 'none';
+                el.style.border = 'none';
+            });
             
-            // إزالة الرسالة تلقائياً بعد 3 ثوانٍ
             setTimeout(() => {
-                if (messageElement.parentNode) {
-                    messageElement.remove();
-                }
-            }, 3000);
+                document.documentElement.dir = isArabic ? 'rtl' : 'ltr';
+                document.documentElement.lang = lang;
+                
+                // تبديل العناصر
+                document.querySelectorAll('.lang-ar').forEach(el => {
+                    el.classList.toggle('hidden', !isArabic);
+                });
+                
+                document.querySelectorAll('.lang-de').forEach(el => {
+                    el.classList.toggle('hidden', isArabic);
+                });
+                
+                // إعادة تعيين تأثيرات الكتابة
+                const newTypewriterElements = document.querySelectorAll('.typewriter');
+                newTypewriterElements.forEach(el => {
+                    el.classList.add(isArabic ? 'typewriter-ar' : 'typewriter-de');
+                    el.style.width = '0';
+                    void el.offsetWidth; // إعادة التهيئة
+                    el.classList.add('typewriter');
+                });
+                
+                // إزالة تأثير الإخفاء وإعادة إظهار العناصر
+                contentElements.forEach(el => {
+                    el.classList.remove('fade-out');
+                    if (el.classList.contains('btn-animate')) {
+                        el.classList.add('btn-animate');
+                    } else if (el.classList.contains('arrow-animate')) {
+                        el.classList.add('arrow-animate');
+                    } else if (el.classList.contains('logo-animate')) {
+                        el.classList.add('logo-animate');
+                    } else if (el.classList.contains('subtitle-fade-in')) {
+                        el.classList.add('subtitle-fade-in');
+                        setTimeout(() => {
+                            el.classList.add('fade-in');
+                        }, 100);
+                    }
+                });
+                
+                // إخفاء المؤشر بعد انتهاء الكتابة
+                setTimeout(() => {
+                    newTypewriterElements.forEach(el => {
+                        el.style.animation = 'none';
+                        el.style.border = 'none';
+                    });
+                }, 2500);
+                
+            }, 500);
         }
-        
-        // وظائف إدارة الكوكيز
-        function setCookie(name, value, days) {
-            const d = new Date();
-            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-            const expires = "expires=" + d.toUTCString();
-            document.cookie = name + "=" + value + ";" + expires + ";path=/";
-        }
-        
-        function getCookie(name) {
-            const cookieName = name + "=";
-            const decodedCookie = decodeURIComponent(document.cookie);
-            const cookieArray = decodedCookie.split(';');
-            
-            for(let i = 0; i < cookieArray.length; i++) {
-                let cookie = cookieArray[i];
-                while (cookie.charAt(0) === ' ') {
-                    cookie = cookie.substring(1);
-                }
-                if (cookie.indexOf(cookieName) === 0) {
-                    return cookie.substring(cookieName.length, cookie.length);
-                }
-            }
-            return "";
-        }
-        
-        // إيقاف التحديث التلقائي عند إغلاق الصفحة
-        window.addEventListener('beforeunload', function() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-                console.log('Auto-refresh stopped');
-            }
+
+        langToggle.addEventListener('click', () => {
+            const newLang = currentLang === 'ar' ? 'de' : 'ar';
+            setLanguage(newLang);
         });
-    });
-</script>
+    </script>
 </body>
 </html>
